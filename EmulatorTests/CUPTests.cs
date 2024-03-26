@@ -41,7 +41,6 @@ public class CPUTests
 
         uut.interprete(data);
 
-        // Testing status
         Assert.Equal(10, uut.register_x);
     }
 
@@ -53,7 +52,6 @@ public class CPUTests
 
         uut.interprete(data);
 
-        // Testing status
         Assert.Equal(0xc1, uut.register_x);
     }
 
