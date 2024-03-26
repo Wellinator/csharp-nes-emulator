@@ -56,4 +56,16 @@ public class CPUTests
         // Testing status
         Assert.Equal(0xc1, uut.register_x);
     }
+
+    [Fact]
+    public void test_inx_overflow_should_wrap_to_zero()
+    {
+        CPU uut = new CPU();
+        uut.register_x = 0xFF;
+        byte[] data = new byte[] { 0xe8, 0xe8, 0x00 };
+
+        uut.interprete(data);
+
+        Assert.Equal(0x01, uut.register_x);
+    }
 }
