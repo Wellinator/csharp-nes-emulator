@@ -81,4 +81,18 @@ public class CPUTests
 
         Assert.Equal(0x01, uut.register_x);
     }
+
+    [Fact]
+    public void test_lda_from_memory()
+    {
+        Memory mem = new Memory();
+        CPU uut = new CPU(mem);
+        byte[] data = new byte[] { 0xa5, 0x10, 0x00 };
+
+        mem.write(0x10, 0x55);
+        uut.loadAndRun(data);
+
+
+        Assert.Equal(0x55, uut.register_a);
+    }
 }
