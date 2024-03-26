@@ -51,48 +51,13 @@ namespace NES_Emulator
                         program_counter++;
                         register_a = param;
 
-                        if (register_a == 0)
-                        {
-                            setStatus(CPUStatus.Zero);
-                        }
-                        else
-                        {
-                            status &= 0b11111101;
-                        }
-
-                        if ((register_a & CPUStatus.Negative) != 0)
-                        {
-                            setStatus(CPUStatus.Negative);
-                        }
-                        else
-                        {
-                            status &= 0b01111111;
-                        }
+                        updateZeroAndNegativeFlags(register_a);
 
                         break;
 
                     case (byte)CPU_OPCODES.TAX:
                         register_x = register_a;
-
-                        if (register_x == 0)
-                        {
-                            setStatus(CPUStatus.Zero);
-                        }
-                        else
-                        {
-                            status &= 0b011111101;
-                        }
-
-                        if ((status & CPUStatus.Negative) != 0)
-                        {
-                            setStatus(CPUStatus.Zero);
-                        }
-                        else
-                        {
-                            status &= 0b01111111;
-
-                        }
-
+                        updateZeroAndNegativeFlags(register_x);
                         return;
 
                     case (byte)CPU_OPCODES.BRK:
@@ -109,6 +74,27 @@ namespace NES_Emulator
         {
             status |= Status;
             return status;
+        }
+
+        private void updateZeroAndNegativeFlags(in byte Result)
+        {
+            if (Result == 0)
+            {
+                setStatus(CPUStatus.Zero);
+            }
+            else
+            {
+                status &= 0b11111101;
+            }
+
+            if ((Result & CPUStatus.Negative) != 0)
+            {
+                setStatus(CPUStatus.Negative);
+            }
+            else
+            {
+                status &= 0b01111111;
+            }
         }
     }
 
