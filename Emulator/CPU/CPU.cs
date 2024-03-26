@@ -32,6 +32,7 @@ namespace NES_Emulator
 
         public byte register_a { get; set; }
         public byte register_x { get; set; }
+        public byte register_y { get; set; }
         public byte status { get; set; }
         public ushort program_counter { get; set; }
         public iMemory _memory { get; set; }
@@ -45,11 +46,37 @@ namespace NES_Emulator
 
                 switch (opcode)
                 {
-                    case CPUOpcodes.LDA:
-                        byte param = _memory.read(program_counter);
-                        program_counter++;
-                        register_a = param;
-                        updateZeroAndNegativeFlags(register_a);
+                    case CPUOpcodes.LDA_Immediate:
+                        LDA(CPUAddressingMode.Immediate);
+                        program_counter += 1;
+                        break;
+                    case CPUOpcodes.LDA_ZeroPage:
+                        LDA(CPUAddressingMode.ZeroPage);
+                        program_counter += 1;
+                        break;
+                    case CPUOpcodes.LDA_ZeroPage_X:
+                        LDA(CPUAddressingMode.ZeroPage_X);
+                        program_counter += 1;
+                        break;
+                    case CPUOpcodes.LDA_Absolute:
+                        LDA(CPUAddressingMode.Absolute);
+                        program_counter += 2;
+                        break;
+                    case CPUOpcodes.LDA_Absolute_X:
+                        LDA(CPUAddressingMode.Absolute_X);
+                        program_counter += 2;
+                        break;
+                    case CPUOpcodes.LDA_Absolute_Y:
+                        LDA(CPUAddressingMode.Absolute_Y);
+                        program_counter += 2;
+                        break;
+                    case CPUOpcodes.LDA_Indirect_X:
+                        LDA(CPUAddressingMode.Indirect_X);
+                        program_counter += 1;
+                        break;
+                    case CPUOpcodes.LDA_Indirect_Y:
+                        LDA(CPUAddressingMode.Indirect_Y);
+                        program_counter += 1;
                         break;
 
                     case CPUOpcodes.TAX:
@@ -71,6 +98,76 @@ namespace NES_Emulator
 
             }
         }
+
+        private void LDA(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+
+            register_a = value;
+            updateZeroAndNegativeFlags(register_a);
+        }
+
+        private ushort getAddressByMode(CPUAddressingMode mode)
+        {
+            byte pos;
+            byte ptr, lo, hi;
+            ushort addr;
+            ushort addr_base;
+
+            switch (mode)
+            {
+
+                case CPUAddressingMode.Immediate:
+                    return program_counter;
+
+                case CPUAddressingMode.ZeroPage:
+                    return _memory.read(program_counter);
+
+                case CPUAddressingMode.Absolute:
+                    return _memory.readU16(program_counter);
+
+                case CPUAddressingMode.ZeroPage_X:
+                    pos = _memory.read(program_counter);
+                    addr = (ushort)((pos + register_x) % 0xFF);
+                    return addr;
+
+                case CPUAddressingMode.ZeroPage_Y:
+                    pos = _memory.read(program_counter);
+                    addr = (ushort)((pos + register_x) % 0xFF);
+                    return addr;
+
+                case CPUAddressingMode.Absolute_X:
+                    addr_base = _memory.readU16(program_counter);
+                    addr = (ushort)((addr_base + register_x) % 0xFF);
+                    return addr;
+
+                case CPUAddressingMode.Absolute_Y:
+                    addr_base = _memory.readU16(program_counter);
+                    addr = (ushort)((addr_base + register_y) % 0xFF);
+                    return addr;
+
+                case CPUAddressingMode.Indirect_X:
+                    addr_base = _memory.read(program_counter);
+                    ptr = (byte)((addr_base + register_x) % 0xFF);
+                    lo = _memory.read(ptr);
+                    hi = _memory.read((ushort)((addr_base + 1) % 0xFF));
+                    return (ushort)(hi << 8 | lo);
+
+                case CPUAddressingMode.Indirect_Y:
+                    addr_base = _memory.read(program_counter);
+                    lo = _memory.read(addr_base);
+                    hi = _memory.read((ushort)((addr_base + 1) % 0xFF));
+                    ushort deref_base = (ushort)(hi << 8 | lo);
+                    ushort deref = (ushort)((deref_base + register_y) % 0xFF);
+                    return deref;
+
+                default:
+                    throw new Exception($"Invalid LDA addressing mode: {mode}!");
+            }
+        }
+
+
 
         public byte setStatus(in byte Status)
         {
