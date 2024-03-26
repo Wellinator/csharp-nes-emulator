@@ -46,6 +46,7 @@ namespace NES_Emulator
 
                 switch (opcode)
                 {
+                    // LDA
                     case CPUOpcodes.LDA_Immediate:
                         LDA(CPUAddressingMode.Immediate);
                         program_counter += 1;
@@ -79,6 +80,36 @@ namespace NES_Emulator
                         program_counter += 1;
                         break;
 
+                    // STA
+                    case CPUOpcodes.STA_ZeroPage:
+                        STA(CPUAddressingMode.ZeroPage);
+                        program_counter += 1;
+                        break;
+                    case CPUOpcodes.STA_ZeroPage_X:
+                        STA(CPUAddressingMode.ZeroPage_X);
+                        program_counter += 1;
+                        break;
+                    case CPUOpcodes.STA_Absolute:
+                        STA(CPUAddressingMode.Absolute);
+                        program_counter += 2;
+                        break;
+                    case CPUOpcodes.STA_Absolute_X:
+                        STA(CPUAddressingMode.Absolute_X);
+                        program_counter += 2;
+                        break;
+                    case CPUOpcodes.STA_Absolute_Y:
+                        STA(CPUAddressingMode.Absolute_Y);
+                        program_counter += 2;
+                        break;
+                    case CPUOpcodes.STA_Indirect_X:
+                        STA(CPUAddressingMode.Indirect_X);
+                        program_counter += 1;
+                        break;
+                    case CPUOpcodes.STA_Indirect_Y:
+                        STA(CPUAddressingMode.Indirect_Y);
+                        program_counter += 1;
+                        break;
+
                     case CPUOpcodes.TAX:
                         register_x = register_a;
                         updateZeroAndNegativeFlags(register_x);
@@ -106,6 +137,12 @@ namespace NES_Emulator
 
             register_a = value;
             updateZeroAndNegativeFlags(register_a);
+        }
+
+        private void STA(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            _memory.write(addr, register_a);
         }
 
         private ushort getAddressByMode(CPUAddressingMode mode)
@@ -163,7 +200,7 @@ namespace NES_Emulator
                     return deref;
 
                 default:
-                    throw new Exception($"Invalid LDA addressing mode: {mode}!");
+                    throw new Exception($"Invalid addressing mode: {mode}!");
             }
         }
 
