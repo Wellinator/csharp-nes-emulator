@@ -44,4 +44,16 @@ public class CPUTests
         // Testing status
         Assert.Equal(10, uut.register_x);
     }
+
+    [Fact]
+    public void test_5_ops_working_together()
+    {
+        CPU uut = new CPU();
+        byte[] data = new byte[] { 0xa9, 0xc0, 0xaa, 0xe8, 0x00 };
+
+        uut.interprete(data);
+
+        // Testing status
+        Assert.Equal(0xc1, uut.register_x);
+    }
 }
