@@ -5,6 +5,7 @@ namespace NES_Emulator
         BRK = 0x00,
         LDA = 0xA9,
         TAX = 0xAA,
+        INX = 0xE8,
     }
 
     public interface iCPU
@@ -59,6 +60,11 @@ namespace NES_Emulator
                         register_x = register_a;
                         updateZeroAndNegativeFlags(register_x);
                         return;
+
+                    case (byte)CPU_OPCODES.INX:
+                        register_x += 1;
+                        updateZeroAndNegativeFlags(register_x);
+                        break;
 
                     case (byte)CPU_OPCODES.BRK:
                         return;
