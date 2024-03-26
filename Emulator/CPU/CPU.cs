@@ -10,45 +10,50 @@ namespace NES_Emulator
 
     public interface iCPU
     {
+        public iMemory _memory { get; set; }
         public byte register_a { get; set; }
         public byte register_x { get; set; }
         public byte status { get; set; }
-        public byte program_counter { get; set; }
-
-        public void interprete(byte[] program);
-
+        public ushort program_counter { get; set; }
+        public void run();
         public byte setStatus(in byte Status);
+        public void reset();
+        public void load(byte[] Program);
+        public void loadAndRun(byte[] Program);
+
     }
 
 
     public class CPU : iCPU
     {
-        public CPU()
+
+        public CPU(iMemory Memory)
         {
             register_a = 0;
             register_x = 0;
             status = 0;
             program_counter = 0;
+
+            _memory = Memory;
         }
 
         public byte register_a { get; set; }
         public byte register_x { get; set; }
         public byte status { get; set; }
-        public byte program_counter { get; set; }
+        public ushort program_counter { get; set; }
+        public iMemory _memory { get; set; }
 
-        public void interprete(byte[] program)
+        public void run()
         {
-            program_counter = 0;
-
             while (true)
             {
-                byte opcode = program[program_counter];
+                byte opcode = _memory.read(program_counter);
                 program_counter++;
 
                 switch (opcode)
                 {
                     case (byte)CPU_OPCODES.LDA:
-                        byte param = program[program_counter];
+                        byte param = _memory.read(program_counter);
                         program_counter++;
                         register_a = param;
                         updateZeroAndNegativeFlags(register_a);
@@ -99,6 +104,28 @@ namespace NES_Emulator
             {
                 status &= 0b01111111;
             }
+        }
+
+        public void reset()
+        {
+            register_a = 0;
+            register_x = 0;
+            status = 0;
+
+            program_counter = _memory.readU16(0xFFFC);
+        }
+
+        public void load(byte[] Program)
+        {
+            _memory.load(Program);
+            _memory.writeU16(0xFFFC, 0x8000);
+        }
+
+        public void loadAndRun(byte[] Program)
+        {
+            load(Program);
+            reset();
+            run();
         }
     }
 
