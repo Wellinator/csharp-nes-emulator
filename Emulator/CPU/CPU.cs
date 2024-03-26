@@ -51,15 +51,13 @@ namespace NES_Emulator
                         byte param = program[program_counter];
                         program_counter++;
                         register_a = param;
-
                         updateZeroAndNegativeFlags(register_a);
-
                         break;
 
                     case (byte)CPU_OPCODES.TAX:
                         register_x = register_a;
                         updateZeroAndNegativeFlags(register_x);
-                        return;
+                        break;
 
                     case (byte)CPU_OPCODES.INX:
                         register_x += 1;
