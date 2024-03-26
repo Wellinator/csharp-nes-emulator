@@ -15,6 +15,8 @@ namespace NES_Emulator
         public byte program_counter { get; set; }
 
         public void interprete(byte[] program);
+
+        public byte setStatus(in byte Status);
     }
 
 
@@ -51,16 +53,16 @@ namespace NES_Emulator
 
                         if (register_a == 0)
                         {
-                            status |= 0b00000010;
+                            setStatus(CPUStatus.Zero);
                         }
                         else
                         {
                             status &= 0b11111101;
                         }
 
-                        if ((register_a & 0b10000000) != 0)
+                        if ((register_a & CPUStatus.Negative) != 0)
                         {
-                            status |= 0b10000000;
+                            setStatus(CPUStatus.Negative);
                         }
                         else
                         {
@@ -77,6 +79,12 @@ namespace NES_Emulator
                 }
 
             }
+        }
+
+        public byte setStatus(in byte Status)
+        {
+            status |= Status;
+            return status;
         }
     }
 
