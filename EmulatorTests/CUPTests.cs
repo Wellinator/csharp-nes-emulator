@@ -31,4 +31,17 @@ public class CPUTests
         // Testing status
         Assert.Equal(0b10, 0b00000010 & uut.status);
     }
+
+    [Fact]
+    public void test_0xaa_tax_move_a_to_x()
+    {
+        CPU uut = new CPU();
+        byte[] data = new byte[] { 0xaa, 0x00 };
+        uut.register_a = 10;
+
+        uut.interprete(data);
+
+        // Testing status
+        Assert.Equal(10, uut.register_x);
+    }
 }
