@@ -1,12 +1,5 @@
 namespace NES_Emulator
 {
-    enum CPU_OPCODES
-    {
-        BRK = 0x00,
-        LDA = 0xA9,
-        TAX = 0xAA,
-        INX = 0xE8,
-    }
 
     public interface iCPU
     {
@@ -52,24 +45,24 @@ namespace NES_Emulator
 
                 switch (opcode)
                 {
-                    case (byte)CPU_OPCODES.LDA:
+                    case CPUOpcodes.LDA:
                         byte param = _memory.read(program_counter);
                         program_counter++;
                         register_a = param;
                         updateZeroAndNegativeFlags(register_a);
                         break;
 
-                    case (byte)CPU_OPCODES.TAX:
+                    case CPUOpcodes.TAX:
                         register_x = register_a;
                         updateZeroAndNegativeFlags(register_x);
                         break;
 
-                    case (byte)CPU_OPCODES.INX:
+                    case CPUOpcodes.INX:
                         register_x += 1;
                         updateZeroAndNegativeFlags(register_x);
                         break;
 
-                    case (byte)CPU_OPCODES.BRK:
+                    case CPUOpcodes.BRK:
                         return;
 
                     default:
