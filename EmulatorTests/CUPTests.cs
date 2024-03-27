@@ -10,13 +10,13 @@ public class CPUTests
         Memory mem = new Memory();
         CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0xa9, 0x05, 0x00 };
-        uut.register_a = 10;
+        uut.register_acc = 10;
 
         uut.loadAndRun(data);
 
 
         // Testing operation
-        Assert.Equal(0x05, uut.register_a);
+        Assert.Equal(0x05, uut.register_acc);
         // Testing status
         Assert.Equal(0b00, 0b00000010 & uut.status);
         Assert.Equal(0, 0b10000000 & uut.status);
@@ -45,7 +45,7 @@ public class CPUTests
         uut.load(data);
         uut.reset();
 
-        uut.register_a = 10;
+        uut.register_acc = 10;
 
         uut.run();
 
@@ -87,13 +87,13 @@ public class CPUTests
     {
         Memory mem = new Memory();
         CPU uut = new CPU(mem);
-        byte[] data = new byte[] { 0xa5, 0x10, 0x00 };
+        byte[] data = new byte[] { 0xA5, 0x10, 0x00 };
 
         mem.write(0x10, 0x55);
         uut.loadAndRun(data);
 
 
-        Assert.Equal(0x55, uut.register_a);
+        Assert.Equal(0x55, uut.register_acc);
     }
 
     [Fact]
@@ -110,5 +110,35 @@ public class CPUTests
         uut.run();
 
         Assert.Equal(0x00, uut.status & CPUStatus.Carry);
+    }
+
+    [Fact]
+    public void test_add_memory_to_accumulator_with_carry()
+    {
+        Memory mem = new Memory();
+        CPU uut = new CPU(mem);
+        byte[] data = new byte[] { 0x18, 0xA9, 0x4C, 0x6D, 0x10, 0x00 };
+
+
+        mem.write(0x10, 0x55);
+        uut.loadAndRun(data);
+
+        Assert.Equal(0xA1, uut.register_acc);
+        Assert.Equal(0x00, uut.status & CPUStatus.Carry);
+        // Assert.Equal(0x00, uut.status & CPUStatus.Overflow);
+    }
+
+    [Fact]
+    public void test_add_memory_to_accumulator_with_carry_overflow()
+    {
+        Memory mem = new Memory();
+        CPU uut = new CPU(mem);
+        byte[] data = new byte[] { 0x18, 0xA9, 0xFE, 0x6D, 0x10, 0x00 };
+
+        mem.write(0x10, 0x55);
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x54, uut.register_acc);
+        Assert.NotEqual(0x00, uut.status & CPUStatus.Carry);
     }
 }
