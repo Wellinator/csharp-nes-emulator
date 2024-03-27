@@ -141,4 +141,16 @@ public class CPUTests
         Assert.Equal(0x54, uut.register_acc);
         Assert.NotEqual(0x00, uut.status & CPUStatus.Carry);
     }
+
+    [Fact]
+    public void test_and_memory_with_accumulator()
+    {
+        Memory mem = new Memory();
+        CPU uut = new CPU(mem);
+        byte[] data = new byte[] { 0x18, 0xA9, 0xF0, 0x29, 0x55, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x50, uut.register_acc);
+    }
 }
