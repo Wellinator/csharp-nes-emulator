@@ -153,4 +153,29 @@ public class CPUTests
 
         Assert.Equal(0x50, uut.register_acc);
     }
+
+    [Fact]
+    public void test_shift_left_one_bit_accumulator_no_carry()
+    {
+        Memory mem = new Memory();
+        CPU uut = new CPU(mem);
+        byte[] data = new byte[] { 0x18, 0xA9, 0x01, 0x0A, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x02, uut.register_acc);
+    }
+
+    [Fact]
+    public void test_shift_left_one_bit_accumulator_with_carry()
+    {
+        Memory mem = new Memory();
+        CPU uut = new CPU(mem);
+        byte[] data = new byte[] { 0x18, 0xA9, 0x82, 0x0A, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x04, uut.register_acc);
+        Assert.True((uut.status & CPUStatus.Carry) == CPUStatus.Carry);
+    }
 }
