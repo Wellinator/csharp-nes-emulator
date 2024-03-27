@@ -11,6 +11,8 @@ namespace NES_Emulator
         Absolute_Y = 6,
         Indirect_X = 7,
         Indirect_Y = 8,
-        NoneAddressing = 9,
+        Accumulator = 9,
+        Relative = 10,
+        NoneAddressing = 11,
     }
 }

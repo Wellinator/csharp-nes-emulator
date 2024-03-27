@@ -51,7 +51,7 @@ namespace NES_Emulator
                 program_counter++;
 
                 ushort program_counter_state = program_counter;
-                var opcode = instruction_table.GetInstruction(instruction);
+                CPUInstruction opcode = instruction_table.GetInstruction(instruction);
 
                 switch (instruction)
                 {
