@@ -6,7 +6,7 @@ namespace NES_Emulator
     public interface iCPU
     {
         public iMemory _memory { get; set; }
-        public byte register_a { get; set; }
+        public byte register_acc { get; set; }
         public byte register_x { get; set; }
         public byte status { get; set; }
         public ushort program_counter { get; set; }
@@ -25,7 +25,7 @@ namespace NES_Emulator
 
         public CPU(iMemory Memory)
         {
-            register_a = 0;
+            register_acc = 0;
             register_x = 0;
             status = 0;
             program_counter = 0;
@@ -34,7 +34,7 @@ namespace NES_Emulator
             instruction_table = new CPUInstructionTable();
         }
 
-        public byte register_a { get; set; }
+        public byte register_acc { get; set; }
         public byte register_x { get; set; }
         public byte register_y { get; set; }
         public byte status { get; set; }
@@ -55,6 +55,18 @@ namespace NES_Emulator
 
                 switch (instruction)
                 {
+                    // ADC
+                    case CPUOpcodes.ADC_Immediate:
+                    case CPUOpcodes.ADC_ZeroPage:
+                    case CPUOpcodes.ADC_ZeroPage_X:
+                    case CPUOpcodes.ADC_Absolute:
+                    case CPUOpcodes.ADC_Absolute_X:
+                    case CPUOpcodes.ADC_Absolute_Y:
+                    case CPUOpcodes.ADC_Indirect_X:
+                    case CPUOpcodes.ADC_Indirect_Y:
+                        ADC(opcode.mode);
+                        break;
+
                     case CPUOpcodes.CLC:
                         CLC();
                         break;
@@ -105,6 +117,13 @@ namespace NES_Emulator
             }
         }
 
+        private void ADC(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+            addToRegisterA(value);
+        }
+
         private void CLC()
         {
             removeStatus(CPUStatus.Carry);
@@ -112,7 +131,7 @@ namespace NES_Emulator
 
         private void TAX()
         {
-            register_x = register_a;
+            register_x = register_acc;
             updateZeroAndNegativeFlags(register_x);
         }
 
@@ -126,15 +145,51 @@ namespace NES_Emulator
         {
             ushort addr = getAddressByMode(mode);
             byte value = _memory.read(addr);
-
-            register_a = value;
-            updateZeroAndNegativeFlags(register_a);
+            setRegisterAcc(value);
         }
 
         private void STA(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            _memory.write(addr, register_a);
+            _memory.write(addr, register_acc);
+        }
+
+        private void setRegisterAcc(byte Value)
+        {
+            register_acc = Value;
+            updateZeroAndNegativeFlags(register_acc);
+        }
+
+
+        private void addToRegisterA(byte data)
+        {
+            int sum = (status & CPUStatus.Carry) > 0
+                ? register_acc + data + 1
+                : register_acc + data + 0;
+
+            bool carry = sum > 0xFF;
+
+            if (carry)
+            {
+                setStatus(CPUStatus.Carry);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Carry);
+            }
+
+            byte result = (byte)(sum % 0xFF);
+
+            if (((data ^ result) & (result ^ register_acc) & 0x80) != 0)
+            {
+                setStatus(CPUStatus.Overflow);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Overflow);
+            }
+
+            setRegisterAcc(result);
         }
 
         private ushort getAddressByMode(CPUAddressingMode mode)
@@ -233,7 +288,7 @@ namespace NES_Emulator
 
         public void reset()
         {
-            register_a = 0;
+            register_acc = 0;
             register_x = 0;
             status = 0;
 
