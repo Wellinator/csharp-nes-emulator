@@ -95,4 +95,20 @@ public class CPUTests
 
         Assert.Equal(0x55, uut.register_a);
     }
+
+    [Fact]
+    public void test_clear_carry_bit()
+    {
+        Memory mem = new Memory();
+        CPU uut = new CPU(mem);
+        byte[] data = new byte[] { 0x18, 0x00 };
+
+        uut.load(data);
+        uut.reset();
+
+        uut.setStatus(CPUStatus.Carry);
+        uut.run();
+
+        Assert.Equal(0x00, uut.status & CPUStatus.Carry);
+    }
 }
