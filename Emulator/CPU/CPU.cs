@@ -79,6 +79,18 @@ namespace NES_Emulator
                         AND(opcode.mode);
                         break;
 
+                    // ASL
+                    case CPUOpcodes.ASL_Accumulator:
+                        ASL();
+                        break;
+
+                    case CPUOpcodes.ASL_ZeroPage:
+                    case CPUOpcodes.ASL_ZeroPage_X:
+                    case CPUOpcodes.ASL_Absolute:
+                    case CPUOpcodes.ASL_Absolute_X:
+                        ASL(opcode.mode);
+                        break;
+
                     case CPUOpcodes.CLC:
                         CLC();
                         break;
@@ -143,6 +155,45 @@ namespace NES_Emulator
 
             byte result = (byte)(value & register_acc);
             setRegisterAcc(result);
+        }
+
+        private void ASL()
+        {
+            byte value = register_acc;
+            byte result = (byte)(value << 1);
+
+            bool is7thBitSet = (value & 0x80) > 0;
+            if (is7thBitSet)
+            {
+                setStatus(CPUStatus.Carry);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Carry);
+            }
+
+            setRegisterAcc(result);
+        }
+
+        private void ASL(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+
+            byte result = (byte)(value << 1);
+
+            bool is7thBitSet = (value & 0x80) > 0;
+            if (is7thBitSet)
+            {
+                setStatus(CPUStatus.Carry);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Carry);
+            }
+
+            _memory.write(addr, result);
+            updateZeroAndNegativeFlags(result);
         }
 
         private void CLC()
