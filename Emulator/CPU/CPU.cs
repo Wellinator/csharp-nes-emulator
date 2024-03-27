@@ -1,3 +1,5 @@
+using System.Reflection.Emit;
+
 namespace NES_Emulator
 {
 
@@ -8,6 +10,7 @@ namespace NES_Emulator
         public byte register_x { get; set; }
         public byte status { get; set; }
         public ushort program_counter { get; set; }
+        public Dictionary<byte, CPUInstruction> instruction_table { get; set; }
         public void run();
         public byte setStatus(in byte Status);
         public void reset();
@@ -26,8 +29,10 @@ namespace NES_Emulator
             register_x = 0;
             status = 0;
             program_counter = 0;
-
             _memory = Memory;
+            instruction_table = new Dictionary<byte, CPUInstruction>();
+
+            loadInstructionTable();
         }
 
         public byte register_a { get; set; }
@@ -36,98 +41,77 @@ namespace NES_Emulator
         public byte status { get; set; }
         public ushort program_counter { get; set; }
         public iMemory _memory { get; set; }
+        public Dictionary<byte, CPUInstruction> instruction_table { get; set; }
 
         public void run()
         {
             while (true)
             {
-                byte opcode = _memory.read(program_counter);
+
+                byte instruction = _memory.read(program_counter);
                 program_counter++;
 
-                switch (opcode)
+                ushort program_counter_state = program_counter;
+                var opcode = instruction_table[instruction];
+
+                switch (instruction)
                 {
                     // LDA
                     case CPUOpcodes.LDA_Immediate:
-                        LDA(CPUAddressingMode.Immediate);
-                        program_counter += 1;
-                        break;
                     case CPUOpcodes.LDA_ZeroPage:
-                        LDA(CPUAddressingMode.ZeroPage);
-                        program_counter += 1;
-                        break;
                     case CPUOpcodes.LDA_ZeroPage_X:
-                        LDA(CPUAddressingMode.ZeroPage_X);
-                        program_counter += 1;
-                        break;
                     case CPUOpcodes.LDA_Absolute:
-                        LDA(CPUAddressingMode.Absolute);
-                        program_counter += 2;
-                        break;
                     case CPUOpcodes.LDA_Absolute_X:
-                        LDA(CPUAddressingMode.Absolute_X);
-                        program_counter += 2;
-                        break;
                     case CPUOpcodes.LDA_Absolute_Y:
-                        LDA(CPUAddressingMode.Absolute_Y);
-                        program_counter += 2;
-                        break;
                     case CPUOpcodes.LDA_Indirect_X:
-                        LDA(CPUAddressingMode.Indirect_X);
-                        program_counter += 1;
-                        break;
                     case CPUOpcodes.LDA_Indirect_Y:
-                        LDA(CPUAddressingMode.Indirect_Y);
-                        program_counter += 1;
+                        LDA(opcode.mode);
                         break;
 
                     // STA
                     case CPUOpcodes.STA_ZeroPage:
-                        STA(CPUAddressingMode.ZeroPage);
-                        program_counter += 1;
-                        break;
                     case CPUOpcodes.STA_ZeroPage_X:
-                        STA(CPUAddressingMode.ZeroPage_X);
-                        program_counter += 1;
-                        break;
                     case CPUOpcodes.STA_Absolute:
-                        STA(CPUAddressingMode.Absolute);
-                        program_counter += 2;
-                        break;
                     case CPUOpcodes.STA_Absolute_X:
-                        STA(CPUAddressingMode.Absolute_X);
-                        program_counter += 2;
-                        break;
                     case CPUOpcodes.STA_Absolute_Y:
-                        STA(CPUAddressingMode.Absolute_Y);
-                        program_counter += 2;
-                        break;
                     case CPUOpcodes.STA_Indirect_X:
-                        STA(CPUAddressingMode.Indirect_X);
-                        program_counter += 1;
-                        break;
                     case CPUOpcodes.STA_Indirect_Y:
-                        STA(CPUAddressingMode.Indirect_Y);
-                        program_counter += 1;
+                        STA(opcode.mode);
                         break;
 
                     case CPUOpcodes.TAX:
-                        register_x = register_a;
-                        updateZeroAndNegativeFlags(register_x);
+                        TAX();
                         break;
 
                     case CPUOpcodes.INX:
-                        register_x += 1;
-                        updateZeroAndNegativeFlags(register_x);
+                        INX();
                         break;
 
                     case CPUOpcodes.BRK:
                         return;
 
                     default:
-                        return;
+                        throw new Exception($"Invalid instruction: {opcode.opcode}({opcode.mnemonic})!");
+                }
+
+                if (program_counter_state == program_counter)
+                {
+                    program_counter += (ushort)(opcode.bytes - 1);
                 }
 
             }
+        }
+
+        private void TAX()
+        {
+            register_x = register_a;
+            updateZeroAndNegativeFlags(register_x);
+        }
+
+        private void INX()
+        {
+            register_x += 1;
+            updateZeroAndNegativeFlags(register_x);
         }
 
         private void LDA(CPUAddressingMode mode)
@@ -253,6 +237,40 @@ namespace NES_Emulator
             load(Program);
             reset();
             run();
+        }
+
+        private void loadInstructionTable()
+        {
+            instruction_table.Clear();
+
+            // BRK - Force Interrupt
+            instruction_table.Add(0x00, new CPUInstruction { opcode = 0x00, mnemonic = "BRK", bytes = 1, cycles = 1 });
+
+            // TAX - Transfer Accumulator to X
+            instruction_table.Add(0xAA, new CPUInstruction { opcode = 0xAA, mnemonic = "TAX", bytes = 1, cycles = 2 });
+
+            // INX - Increment X Register
+            instruction_table.Add(0xE8, new CPUInstruction { opcode = 0xE8, mnemonic = "INX", bytes = 1, cycles = 2 });
+
+            // LDA - Load Accumulator
+            instruction_table.Add(0xA9, new CPUInstruction { opcode = 0xA9, mnemonic = "LDA", bytes = 2, cycles = 2, mode = CPUAddressingMode.Immediate });
+            instruction_table.Add(0xA5, new CPUInstruction { opcode = 0xA5, mnemonic = "LDA", bytes = 2, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+            instruction_table.Add(0xB5, new CPUInstruction { opcode = 0xB5, mnemonic = "LDA", bytes = 2, cycles = 4, mode = CPUAddressingMode.ZeroPage_X });
+            instruction_table.Add(0xAD, new CPUInstruction { opcode = 0xAD, mnemonic = "LDA", bytes = 3, cycles = 4, mode = CPUAddressingMode.Absolute });
+            instruction_table.Add(0xBD, new CPUInstruction { opcode = 0xBD, mnemonic = "LDA", bytes = 3, cycles = 4 /*(+1 if page crossed)*/, mode = CPUAddressingMode.Absolute_X });
+            instruction_table.Add(0xB9, new CPUInstruction { opcode = 0xB9, mnemonic = "LDA", bytes = 3, cycles = 4 /*(+1 if page crossed)*/, mode = CPUAddressingMode.Absolute_Y });
+            instruction_table.Add(0xA1, new CPUInstruction { opcode = 0xA1, mnemonic = "LDA", bytes = 2, cycles = 6, mode = CPUAddressingMode.Indirect_X });
+            instruction_table.Add(0xB1, new CPUInstruction { opcode = 0xB1, mnemonic = "LDA", bytes = 2, cycles = 5,/*(+1 if page crossed)*/ mode = CPUAddressingMode.Indirect_Y });
+
+            // STA - Store Accumulator
+            instruction_table.Add(0x85, new CPUInstruction { opcode = 0x85, mnemonic = "STA", bytes = 2, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+            instruction_table.Add(0x95, new CPUInstruction { opcode = 0x95, mnemonic = "STA", bytes = 2, cycles = 4, mode = CPUAddressingMode.ZeroPage_X });
+            instruction_table.Add(0x8D, new CPUInstruction { opcode = 0x8D, mnemonic = "STA", bytes = 3, cycles = 4, mode = CPUAddressingMode.Absolute });
+            instruction_table.Add(0x9D, new CPUInstruction { opcode = 0x9D, mnemonic = "STA", bytes = 3, cycles = 5, mode = CPUAddressingMode.Absolute_X });
+            instruction_table.Add(0x99, new CPUInstruction { opcode = 0x99, mnemonic = "STA", bytes = 3, cycles = 5, mode = CPUAddressingMode.Absolute_Y });
+            instruction_table.Add(0x81, new CPUInstruction { opcode = 0x81, mnemonic = "STA", bytes = 2, cycles = 6, mode = CPUAddressingMode.Indirect_X });
+            instruction_table.Add(0x91, new CPUInstruction { opcode = 0x91, mnemonic = "STA", bytes = 2, cycles = 6, mode = CPUAddressingMode.Indirect_Y });
+
         }
     }
 
