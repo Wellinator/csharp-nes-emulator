@@ -67,6 +67,18 @@ namespace NES_Emulator
                         ADC(opcode.mode);
                         break;
 
+                    // AND
+                    case CPUOpcodes.AND_Immediate:
+                    case CPUOpcodes.AND_ZeroPage:
+                    case CPUOpcodes.AND_ZeroPage_X:
+                    case CPUOpcodes.AND_Absolute:
+                    case CPUOpcodes.AND_Absolute_X:
+                    case CPUOpcodes.AND_Absolute_Y:
+                    case CPUOpcodes.AND_Indirect_X:
+                    case CPUOpcodes.AND_Indirect_Y:
+                        AND(opcode.mode);
+                        break;
+
                     case CPUOpcodes.CLC:
                         CLC();
                         break;
@@ -122,6 +134,15 @@ namespace NES_Emulator
             ushort addr = getAddressByMode(mode);
             byte value = _memory.read(addr);
             addToRegisterA(value);
+        }
+
+        private void AND(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+
+            byte result = (byte)(value & register_acc);
+            setRegisterAcc(result);
         }
 
         private void CLC()
