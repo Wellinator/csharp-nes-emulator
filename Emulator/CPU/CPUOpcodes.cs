@@ -6,7 +6,6 @@ namespace NES_Emulator
         public const byte BRK = 0x00;
         public const byte TAX = 0xAA;
         public const byte INX = 0xE8;
-        public const byte STA = 0xE8;
 
         // LDA
         public const byte LDA_Immediate = 0xA9;
