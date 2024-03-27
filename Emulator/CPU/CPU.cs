@@ -55,6 +55,10 @@ namespace NES_Emulator
 
                 switch (instruction)
                 {
+                    case CPUOpcodes.CLC:
+                        CLC();
+                        break;
+
                     // LDA
                     case CPUOpcodes.LDA_Immediate:
                     case CPUOpcodes.LDA_ZeroPage:
@@ -99,6 +103,11 @@ namespace NES_Emulator
                 }
 
             }
+        }
+
+        private void CLC()
+        {
+            removeStatus(CPUStatus.Carry);
         }
 
         private void TAX()
@@ -195,6 +204,12 @@ namespace NES_Emulator
             return status;
         }
 
+        public byte removeStatus(in byte Status)
+        {
+            status = (byte)(status & (~Status));
+            return status;
+        }
+
         private void updateZeroAndNegativeFlags(in byte Result)
         {
             if (Result == 0)
@@ -203,7 +218,7 @@ namespace NES_Emulator
             }
             else
             {
-                status &= 0b11111101;
+                removeStatus(CPUStatus.Zero);
             }
 
             if ((Result & CPUStatus.Negative) != 0)
@@ -212,7 +227,7 @@ namespace NES_Emulator
             }
             else
             {
-                status &= 0b01111111;
+                removeStatus(CPUStatus.Negative);
             }
         }
 
