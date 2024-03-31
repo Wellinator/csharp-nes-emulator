@@ -22,7 +22,7 @@ namespace NES_Emulator
     {
         public readonly static byte Carry = 0b00000001;
         public readonly static byte Zero = 0b00000010;
-        public readonly static byte InterruptDisable = 0b00000100;
+        public readonly static byte Interrupt = 0b00000100;
         public readonly static byte Decimal = 0b00001000;
         public readonly static byte Overflow = 0b01000000;
         public readonly static byte Negative = 0b10000000;
