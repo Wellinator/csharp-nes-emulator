@@ -229,4 +229,27 @@ public class CPUTests
 
         Assert.Equal(0x00, uut.register_acc);
     }
+
+    [Fact]
+    public void test_bits_in_memory_with_accumulator_zero_flag_showld_be_set()
+    {
+        byte[] data = new byte[] { 0xa9, 0x0f, 0x24, 0x10, 0x00 };
+        mem.write(0x10, 0xf0);
+
+        uut.loadAndRun(data);
+
+        Assert.True((uut.status & CPUStatus.Zero) == CPUStatus.Zero);
+    }
+
+    [Fact]
+    public void test_bits_in_memory_with_accumulator()
+    {
+        byte[] data = new byte[] { 0xa9, 0x0f, 0x24, 0x10, 0x00 };
+        mem.write(0x10, 0x00);
+
+        uut.loadAndRun(data);
+
+        Assert.True((uut.status & CPUStatus.Overflow) == CPUStatus.Overflow);
+        Assert.True((uut.status & CPUStatus.Negative) == CPUStatus.Negative);
+    }
 }
