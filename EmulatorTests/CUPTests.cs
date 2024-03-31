@@ -368,7 +368,7 @@ public class CPUTests
 
         uut.setStatus(CPUStatus.Overflow);
         uut.run();
-        
+
         Assert.Equal(0x05, uut.register_acc);
     }
 
@@ -381,5 +381,18 @@ public class CPUTests
         uut.loadAndRun(data);        
 
         Assert.Equal(0x00, uut.register_acc);
+    }
+
+    [Fact]
+    public void test_clear_decimal_bit()
+    {
+        byte[] data = new byte[] { 0xD8, 0x00 };
+
+        uut.load(data);
+        uut.reset();
+        uut.setStatus(CPUStatus.Decimal);
+        uut.run();
+
+        Assert.Equal(0x00, uut.status & CPUStatus.Decimal);
     }
 }
