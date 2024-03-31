@@ -91,6 +91,18 @@ namespace NES_Emulator
                         ASL(opcode.mode);
                         break;
 
+                    case CPUOpcodes.BCC_Relative:
+                        BCC();
+                        break;
+
+                    case CPUOpcodes.BCS_Relative:
+                        BCS();
+                        break;
+
+                    case CPUOpcodes.BEQ_Relative:
+                        BEQ();
+                        break;
+
                     case CPUOpcodes.CLC:
                         CLC();
                         break;
@@ -196,6 +208,33 @@ namespace NES_Emulator
             updateZeroAndNegativeFlags(result);
         }
 
+        private void BCC()
+        {
+            if ((status & CPUStatus.Carry) == 0)
+            {
+                sbyte displacement = (sbyte)_memory.read(program_counter);
+                program_counter = (ushort)(program_counter + displacement);
+            }
+        }
+
+        private void BCS()
+        {
+            if ((status & CPUStatus.Carry) != 0)
+            {
+                sbyte displacement = (sbyte)_memory.read(program_counter);
+                program_counter = (ushort)(program_counter + displacement);
+            }
+        }
+
+        private void BEQ()
+        {
+            if ((status & CPUStatus.Zero) != 0)
+            {
+                sbyte displacement = (sbyte)_memory.read(program_counter);
+                program_counter = (ushort)(program_counter + displacement);
+            }
+        }
+
         private void CLC()
         {
             removeStatus(CPUStatus.Carry);
@@ -275,6 +314,7 @@ namespace NES_Emulator
             {
 
                 case CPUAddressingMode.Immediate:
+                case CPUAddressingMode.Relative:
                     return program_counter;
 
                 case CPUAddressingMode.ZeroPage:
