@@ -178,4 +178,95 @@ public class CPUTests
         Assert.Equal(0x04, uut.register_acc);
         Assert.True((uut.status & CPUStatus.Carry) == CPUStatus.Carry);
     }
+
+    [Fact]
+    [Trait("Category", "Branch")]
+    public void test_branch_if_carry_clear()
+    {
+        Memory mem = new Memory();
+        CPU uut = new CPU(mem);
+        byte[] data = new byte[] { 0x90, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x05, uut.register_acc);
+    }
+
+    [Fact]
+    [Trait("Category", "Branch")]
+    public void test_not_branch_if_carry_set()
+    {
+        Memory mem = new Memory();
+        CPU uut = new CPU(mem);
+        byte[] data = new byte[] { 0x90, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+
+        uut.load(data);
+        uut.reset();
+
+        uut.setStatus(CPUStatus.Carry);
+        uut.run();
+
+        Assert.Equal(0x00, uut.register_acc);
+    }
+
+    [Fact]
+    [Trait("Category", "Branch")]
+    public void test_branch_if_carry_set()
+    {
+        Memory mem = new Memory();
+        CPU uut = new CPU(mem);
+        byte[] data = new byte[] { 0xB0, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+
+        uut.load(data);
+        uut.reset();
+
+        uut.setStatus(CPUStatus.Carry);
+        uut.run();
+
+        Assert.Equal(0x05, uut.register_acc);
+    }
+
+    [Fact]
+    [Trait("Category", "Branch")]
+    public void test_not_branch_if_carry_clear()
+    {
+        Memory mem = new Memory();
+        CPU uut = new CPU(mem);
+        byte[] data = new byte[] { 0xB0, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+
+        uut.loadAndRun(data);
+
+
+        Assert.Equal(0x00, uut.register_acc);
+    }
+
+    [Fact]
+    [Trait("Category", "Branch")]
+    public void test_branch_if_zero_set()
+    {
+        Memory mem = new Memory();
+        CPU uut = new CPU(mem);
+        byte[] data = new byte[] { 0xF0, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+
+        uut.load(data);
+        uut.reset();
+
+        uut.setStatus(CPUStatus.Zero);
+        uut.run();
+
+        Assert.Equal(0x05, uut.register_acc);
+    }
+
+    [Fact]
+    [Trait("Category", "Branch")]
+    public void test_not_branch_if_zero_clear()
+    {
+        Memory mem = new Memory();
+        CPU uut = new CPU(mem);
+        byte[] data = new byte[] { 0xF0, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x00, uut.register_acc);
+    }
 }
