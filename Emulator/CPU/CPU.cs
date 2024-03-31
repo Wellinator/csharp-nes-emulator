@@ -103,10 +103,14 @@ namespace NES_Emulator
                         BEQ();
                         break;
 
+                    case CPUOpcodes.BIT_ZeroPage:
+                    case CPUOpcodes.BIT_Absolute:
+                        BIT(opcode.mode);
+                        break;
+
                     case CPUOpcodes.CLC:
                         CLC();
                         break;
-
                     // LDA
                     case CPUOpcodes.LDA_Immediate:
                     case CPUOpcodes.LDA_ZeroPage:
@@ -233,6 +237,25 @@ namespace NES_Emulator
                 sbyte displacement = (sbyte)_memory.read(program_counter);
                 program_counter = (ushort)(program_counter + displacement);
             }
+        }
+
+        private void BIT(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+            byte result = (byte)(register_acc & value);
+
+            if(result == 0x00)
+            {
+                setStatus(CPUStatus.Zero);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Zero);
+            }
+
+            setStatus((byte)(CPUStatus.Overflow & value));
+            setStatus((byte)(CPUStatus.Negative & value));
         }
 
         private void CLC()
