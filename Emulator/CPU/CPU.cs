@@ -139,6 +139,10 @@ namespace NES_Emulator
                         CLD();
                         break;
 
+                    case CPUOpcodes.CLI:
+                        CLI();
+                        break;
+
                     // LDA
                     case CPUOpcodes.LDA_Immediate:
                     case CPUOpcodes.LDA_ZeroPage:
@@ -336,6 +340,11 @@ namespace NES_Emulator
         private void CLD()
         {
             removeStatus(CPUStatus.Decimal);
+        }
+
+        private void CLI()
+        {
+            removeStatus(CPUStatus.Interrupt);
         }
 
         private void TAX()
