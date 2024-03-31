@@ -127,6 +127,10 @@ namespace NES_Emulator
                         BVC();
                         break;
 
+                    case CPUOpcodes.BVS:
+                        BVS();
+                        break;
+
                     case CPUOpcodes.CLC:
                         CLC();
                         break;
@@ -304,6 +308,15 @@ namespace NES_Emulator
         private void BVC()
         {
             if ((status & CPUStatus.Overflow) == 0)
+            {
+                sbyte displacement = (sbyte)_memory.read(program_counter);
+                program_counter = (ushort)(program_counter + displacement);
+            }
+        }
+
+        private void BVS()
+        {
+            if ((status & CPUStatus.Overflow) != 0)
             {
                 sbyte displacement = (sbyte)_memory.read(program_counter);
                 program_counter = (ushort)(program_counter + displacement);
