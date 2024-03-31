@@ -2,17 +2,19 @@ namespace NES_Emulator
 {
     public enum CPUAddressingMode
     {
-        Immediate = 0,
-        ZeroPage = 1,
-        ZeroPage_X = 2,
-        ZeroPage_Y = 3,
-        Absolute = 4,
-        Absolute_X = 5,
-        Absolute_Y = 6,
-        Indirect_X = 7,
-        Indirect_Y = 8,
-        Accumulator = 9,
-        Relative = 10,
-        NoneAddressing = 11,
+        Impliend,
+        Accumulator,
+        Immediate,
+        ZeroPage,
+        ZeroPage_X,
+        ZeroPage_Y,
+        Absolute,
+        Absolute_X,
+        Absolute_Y,
+        Indirect_X,
+        Indirect_Y,
+        Absolute_Indirect,
+        Relative,
+        NoneAddressing
     }
 }
