@@ -245,11 +245,37 @@ public class CPUTests
     public void test_bits_in_memory_with_accumulator()
     {
         byte[] data = new byte[] { 0xa9, 0x0f, 0x24, 0x10, 0x00 };
-        mem.write(0x10, 0x00);
+        mem.write(0x10, 0xf0);
 
         uut.loadAndRun(data);
 
         Assert.True((uut.status & CPUStatus.Overflow) == CPUStatus.Overflow);
         Assert.True((uut.status & CPUStatus.Negative) == CPUStatus.Negative);
+    }
+
+    [Fact]
+    [Trait("Category", "Branch")]
+    public void test_branch_if_negative_set()
+    {
+        byte[] data = new byte[] { 0x30, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+
+        uut.load(data);
+        uut.reset();
+
+        uut.setStatus(CPUStatus.Negative);
+        uut.run();
+
+        Assert.Equal(0x05, uut.register_acc);
+    }
+
+    [Fact]
+    [Trait("Category", "Branch")]
+    public void test_not_branch_if_negative_clear()
+    {
+        byte[] data = new byte[] { 0x30, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x00, uut.register_acc);
     }
 }
