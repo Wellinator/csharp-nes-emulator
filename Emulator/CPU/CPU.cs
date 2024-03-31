@@ -120,6 +120,9 @@ namespace NES_Emulator
                         BPL();
                         break;
 
+                    case CPUOpcodes.BRK:
+                        return;
+
                     case CPUOpcodes.CLC:
                         CLC();
                         break;
@@ -153,9 +156,6 @@ namespace NES_Emulator
                     case CPUOpcodes.INX:
                         INX();
                         break;
-
-                    case CPUOpcodes.BRK:
-                        return;
 
                     default:
                         throw new Exception($"Invalid instruction: {opcode.opcode}({opcode.mnemonic})!");
