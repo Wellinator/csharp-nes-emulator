@@ -21,10 +21,7 @@ public class CPUTests
 
         uut.loadAndRun(data);
 
-
-        // Testing operation
         Assert.Equal(0x05, uut.register_acc);
-        // Testing status
         Assert.Equal(0b00, 0b00000010 & uut.status);
         Assert.Equal(0, 0b10000000 & uut.status);
     }
@@ -36,7 +33,6 @@ public class CPUTests
 
         uut.loadAndRun(data);
 
-        // Testing status
         Assert.Equal(0b10, 0b00000010 & uut.status);
     }
 
@@ -44,10 +40,8 @@ public class CPUTests
     public void test_0xaa_tax_move_a_to_x()
     {
         byte[] data = new byte[] { 0xaa, 0x00 };
-
         uut.load(data);
         uut.reset();
-
         uut.register_acc = 10;
 
         uut.run();
@@ -69,14 +63,11 @@ public class CPUTests
     public void test_inx_overflow_should_wrap_to_zero()
     {
         byte[] data = new byte[] { 0xe8, 0xe8, 0x00 };
-
         uut.load(data);
         uut.reset();
-
         uut.register_x = 0xFF;
 
         uut.run();
-
 
         Assert.Equal(0x01, uut.register_x);
     }
@@ -85,10 +76,9 @@ public class CPUTests
     public void test_lda_from_memory()
     {
         byte[] data = new byte[] { 0xA5, 0x10, 0x00 };
-
         mem.write(0x10, 0x55);
-        uut.loadAndRun(data);
 
+        uut.loadAndRun(data);
 
         Assert.Equal(0x55, uut.register_acc);
     }
@@ -97,11 +87,10 @@ public class CPUTests
     public void test_clear_carry_bit()
     {
         byte[] data = new byte[] { 0x18, 0x00 };
-
         uut.load(data);
         uut.reset();
-
         uut.setStatus(CPUStatus.Carry);
+
         uut.run();
 
         Assert.Equal(0x00, uut.status & CPUStatus.Carry);
@@ -112,13 +101,11 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0x18, 0xA9, 0x4C, 0x6D, 0x10, 0x00 };
 
-
         mem.write(0x10, 0x55);
         uut.loadAndRun(data);
 
         Assert.Equal(0xA1, uut.register_acc);
         Assert.Equal(0x00, uut.status & CPUStatus.Carry);
-        // Assert.Equal(0x00, uut.status & CPUStatus.Overflow);
     }
 
     [Fact]
