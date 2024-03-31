@@ -304,4 +304,30 @@ public class CPUTests
 
         Assert.Equal(0x00, uut.register_acc);
     }
+
+    [Fact]
+    [Trait("Category", "Branch")]
+    public void test_branch_if_negative_is_clear()
+    {
+        byte[] data = new byte[] { 0x10, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x05, uut.register_acc);
+    }
+
+    [Fact]
+    [Trait("Category", "Branch")]
+    public void test_not_branch_if_negative_is_set()
+    {
+        byte[] data = new byte[] { 0x10, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+
+        uut.load(data);
+        uut.reset();
+
+        uut.setStatus(CPUStatus.Negative);
+        uut.run();
+
+        Assert.Equal(0x00, uut.register_acc);
+    }
 }
