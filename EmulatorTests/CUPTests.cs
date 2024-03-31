@@ -408,4 +408,17 @@ public class CPUTests
 
         Assert.Equal(0x00, uut.status & CPUStatus.Interrupt);
     }
+
+    [Fact]
+    public void test_clear_overflow_bit()
+    {
+        byte[] data = new byte[] { 0xB8, 0x00 };
+        uut.load(data);
+        uut.reset();
+
+        uut.setStatus(CPUStatus.Overflow);
+        uut.run();
+
+        Assert.Equal(0x00, uut.status & CPUStatus.Overflow);
+    }
 }
