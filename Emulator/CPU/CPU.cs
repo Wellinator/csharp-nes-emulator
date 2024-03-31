@@ -108,6 +108,10 @@ namespace NES_Emulator
                         BIT(opcode.mode);
                         break;
 
+                    case CPUOpcodes.BMI_Relative:
+                        BMI();
+                        break;
+
                     case CPUOpcodes.CLC:
                         CLC();
                         break;
@@ -256,6 +260,15 @@ namespace NES_Emulator
 
             setStatus((byte)(CPUStatus.Overflow & value));
             setStatus((byte)(CPUStatus.Negative & value));
+        }
+
+        private void BMI()
+        {
+            if ((status & CPUStatus.Negative) != 0)
+            {
+                sbyte displacement = (sbyte)_memory.read(program_counter);
+                program_counter = (ushort)(program_counter + displacement);
+            }
         }
 
         private void CLC()
