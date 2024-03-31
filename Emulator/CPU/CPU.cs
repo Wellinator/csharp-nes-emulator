@@ -115,6 +115,10 @@ namespace NES_Emulator
                     case CPUOpcodes.BNE_Relative:
                         BNE();
                         break;
+                        
+                    case CPUOpcodes.BPL_Relative:
+                        BPL();
+                        break;
 
                     case CPUOpcodes.CLC:
                         CLC();
@@ -278,6 +282,15 @@ namespace NES_Emulator
         private void BNE()
         {
             if ((status & CPUStatus.Zero) == 0)
+            {
+                sbyte displacement = (sbyte)_memory.read(program_counter);
+                program_counter = (ushort)(program_counter + displacement);
+            }
+        }
+
+        private void BPL()
+        {
+            if ((status & CPUStatus.Negative) == 0)
             {
                 sbyte displacement = (sbyte)_memory.read(program_counter);
                 program_counter = (ushort)(program_counter + displacement);
