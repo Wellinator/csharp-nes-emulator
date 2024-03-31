@@ -4,11 +4,18 @@ namespace EmulatorTests;
 
 public class CPUTests
 {
+    private readonly Memory mem;
+    private readonly CPU uut;
+
+    public CPUTests(){
+        mem = new Memory();
+        uut = new CPU(mem);
+    }
+
+    
     [Fact]
     public void test_0xa9_lda_immediate_load_data()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0xa9, 0x05, 0x00 };
         uut.register_acc = 10;
 
@@ -25,8 +32,6 @@ public class CPUTests
     [Fact]
     public void test_0xa9_lda_zero_flag()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0xa9, 0x00, 0x00 };
 
         uut.loadAndRun(data);
@@ -38,8 +43,6 @@ public class CPUTests
     [Fact]
     public void test_0xaa_tax_move_a_to_x()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0xaa, 0x00 };
 
         uut.load(data);
@@ -55,8 +58,6 @@ public class CPUTests
     [Fact]
     public void test_5_ops_working_together()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0xa9, 0xc0, 0xaa, 0xe8, 0x00 };
 
         uut.loadAndRun(data);
@@ -67,8 +68,6 @@ public class CPUTests
     [Fact]
     public void test_inx_overflow_should_wrap_to_zero()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0xe8, 0xe8, 0x00 };
 
         uut.load(data);
@@ -85,8 +84,6 @@ public class CPUTests
     [Fact]
     public void test_lda_from_memory()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0xA5, 0x10, 0x00 };
 
         mem.write(0x10, 0x55);
@@ -99,8 +96,6 @@ public class CPUTests
     [Fact]
     public void test_clear_carry_bit()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0x18, 0x00 };
 
         uut.load(data);
@@ -115,8 +110,6 @@ public class CPUTests
     [Fact]
     public void test_add_memory_to_accumulator_with_carry()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0x18, 0xA9, 0x4C, 0x6D, 0x10, 0x00 };
 
 
@@ -131,8 +124,6 @@ public class CPUTests
     [Fact]
     public void test_add_memory_to_accumulator_with_carry_overflow()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0x18, 0xA9, 0xFE, 0x6D, 0x10, 0x00 };
 
         mem.write(0x10, 0x55);
@@ -145,8 +136,6 @@ public class CPUTests
     [Fact]
     public void test_and_memory_with_accumulator()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0x18, 0xA9, 0xF0, 0x29, 0x55, 0x00 };
 
         uut.loadAndRun(data);
@@ -157,8 +146,6 @@ public class CPUTests
     [Fact]
     public void test_shift_left_one_bit_accumulator_no_carry()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0x18, 0xA9, 0x01, 0x0A, 0x00 };
 
         uut.loadAndRun(data);
@@ -169,8 +156,6 @@ public class CPUTests
     [Fact]
     public void test_shift_left_one_bit_accumulator_with_carry()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0x18, 0xA9, 0x82, 0x0A, 0x00 };
 
         uut.loadAndRun(data);
@@ -183,8 +168,6 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_branch_if_carry_clear()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0x90, 0x02, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.loadAndRun(data);
@@ -196,8 +179,6 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_not_branch_if_carry_set()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0x90, 0x02, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
@@ -213,8 +194,6 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_branch_if_carry_set()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0xB0, 0x02, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
@@ -230,8 +209,6 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_not_branch_if_carry_clear()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0xB0, 0x02, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.loadAndRun(data);
@@ -244,8 +221,6 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_branch_if_zero_set()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0xF0, 0x02, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
@@ -261,8 +236,6 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_not_branch_if_zero_clear()
     {
-        Memory mem = new Memory();
-        CPU uut = new CPU(mem);
         byte[] data = new byte[] { 0xF0, 0x02, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.loadAndRun(data);
