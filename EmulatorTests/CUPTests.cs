@@ -395,4 +395,17 @@ public class CPUTests
 
         Assert.Equal(0x00, uut.status & CPUStatus.Decimal);
     }
+
+    [Fact]
+    public void test_clear_interrupt_bit()
+    {
+        byte[] data = new byte[] { 0x58, 0x00 };
+        uut.load(data);
+        uut.reset();
+
+        uut.setStatus(CPUStatus.Interrupt);
+        uut.run();
+
+        Assert.Equal(0x00, uut.status & CPUStatus.Interrupt);
+    }
 }
