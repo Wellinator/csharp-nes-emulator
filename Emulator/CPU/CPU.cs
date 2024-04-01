@@ -115,7 +115,7 @@ namespace NES_Emulator
                     case CPUOpcodes.BNE_Relative:
                         BNE();
                         break;
-                        
+
                     case CPUOpcodes.BPL_Relative:
                         BPL();
                         break;
@@ -145,6 +145,18 @@ namespace NES_Emulator
 
                     case CPUOpcodes.CLV:
                         CLV();
+                        break;
+
+                    // CMP
+                    case CPUOpcodes.CMP_Immediate:
+                    case CPUOpcodes.CMP_ZeroPage:
+                    case CPUOpcodes.CMP_ZeroPage_X:
+                    case CPUOpcodes.CMP_Absolute:
+                    case CPUOpcodes.CMP_Absolute_X:
+                    case CPUOpcodes.CMP_Absolute_Y:
+                    case CPUOpcodes.CMP_Indirect_X:
+                    case CPUOpcodes.CMP_Indirect_Y:
+                        CMP(opcode.mode);
                         break;
 
                     // LDA
@@ -278,7 +290,7 @@ namespace NES_Emulator
             byte value = _memory.read(addr);
             byte result = (byte)(register_acc & value);
 
-            if(result == 0x00)
+            if (result == 0x00)
             {
                 setStatus(CPUStatus.Zero);
             }
@@ -354,6 +366,24 @@ namespace NES_Emulator
         private void CLV()
         {
             removeStatus(CPUStatus.Overflow);
+        }
+
+        private void CMP(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+            byte result = (byte)(register_acc - value);
+
+            if (value <= register_acc)
+            {
+                setStatus(CPUStatus.Carry);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Carry);
+            }
+
+            updateZeroAndNegativeFlags(result);
         }
 
         private void TAX()
