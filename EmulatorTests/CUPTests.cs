@@ -7,12 +7,13 @@ public class CPUTests
     private readonly Memory mem;
     private readonly CPU uut;
 
-    public CPUTests(){
+    public CPUTests()
+    {
         mem = new Memory();
         uut = new CPU(mem);
     }
 
-    
+
     [Fact]
     public void test_0xa9_lda_immediate_load_data()
     {
@@ -378,7 +379,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0x70, 0x02, 0x00, 0xa9, 0x05, 0x00 };
 
-        uut.loadAndRun(data);        
+        uut.loadAndRun(data);
 
         Assert.Equal(0x00, uut.register_acc);
     }
@@ -420,5 +421,25 @@ public class CPUTests
         uut.run();
 
         Assert.Equal(0x00, uut.status & CPUStatus.Overflow);
+    }
+
+    [Fact]
+    public void test_compare_memory_with_accumulator()
+    {
+        byte[] data = new byte[] { 0xa9, 0x05, 0xC9, 0x01, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.True((uut.status & CPUStatus.Carry) > 0);
+    }
+
+    [Fact]
+    public void test_compare_memory_with_accumulator_zero_value()
+    {
+        byte[] data = new byte[] { 0xa9, 0x05, 0xC9, 0x05, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.True((uut.status & CPUStatus.Zero) > 0);
     }
 }
