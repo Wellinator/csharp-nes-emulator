@@ -370,6 +370,11 @@ namespace NES_Emulator
 
         private void CMP(CPUAddressingMode mode)
         {
+            compare(mode, register_acc);
+        }
+
+        private void compare(CPUAddressingMode mode, byte reg)
+        {
             ushort addr = getAddressByMode(mode);
             byte value = _memory.read(addr);
             byte result = (byte)(register_acc - value);
