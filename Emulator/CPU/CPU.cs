@@ -571,12 +571,6 @@ namespace NES_Emulator
             program_counter = _memory.read(addr);
         }
 
-        private void TAX()
-        {
-            register_x = register_acc;
-            updateZeroAndNegativeFlags(register_x);
-        }
-
         private void LDA(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
@@ -605,6 +599,13 @@ namespace NES_Emulator
             ushort addr = getAddressByMode(mode);
             _memory.write(addr, register_acc);
         }
+
+        private void TAX()
+        {
+            register_x = register_acc;
+            updateZeroAndNegativeFlags(register_x);
+        }
+
 
         private void setRegisterAcc(byte Value)
         {
