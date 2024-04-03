@@ -38,6 +38,51 @@ public class CPUTests
     }
 
     [Fact]
+    public void test_ldx_immediate_load_data()
+    {
+        byte[] data = new byte[] { 0xA2, 0x05, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x05, uut.register_x);
+        Assert.Equal(0b00, 0b00000010 & uut.status);
+        Assert.Equal(0, 0b10000000 & uut.status);
+    }
+
+    [Fact]
+    public void test_ldx_zero_flag()
+    {
+        byte[] data = new byte[] { 0xA2, 0x00, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0b10, 0b00000010 & uut.status);
+    }
+
+    [Fact]
+    public void test_ldy_immediate_load_data()
+    {
+        byte[] data = new byte[] { 0xA0, 0x05, 0x00 };
+        uut.register_y = 10;
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x05, uut.register_y);
+        Assert.Equal(0b00, 0b00000010 & uut.status);
+        Assert.Equal(0, 0b10000000 & uut.status);
+    }
+
+    [Fact]
+    public void test_ldy_zero_flag()
+    {
+        byte[] data = new byte[] { 0xA0, 0x00, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0b10, 0b00000010 & uut.status);
+    }
+
+    [Fact]
     public void test_0xaa_tax_move_a_to_x()
     {
         byte[] data = new byte[] { 0xaa, 0x00 };
@@ -437,6 +482,46 @@ public class CPUTests
     public void test_compare_memory_with_accumulator_zero_value()
     {
         byte[] data = new byte[] { 0xa9, 0x05, 0xC9, 0x05, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.True((uut.status & CPUStatus.Zero) > 0);
+    }
+
+    [Fact]
+    public void test_compare_memory_with_x_reg()
+    {
+        byte[] data = new byte[] { 0xA2, 0x05, 0xE0, 0x01, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.True((uut.status & CPUStatus.Carry) > 0);
+    }
+
+    [Fact]
+    public void test_compare_memory_with_x_reg_zero_value()
+    {
+        byte[] data = new byte[] { 0xA2, 0x05, 0xE0, 0x05, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.True((uut.status & CPUStatus.Zero) > 0);
+    }
+
+    [Fact]
+    public void test_compare_memory_with_y_reg()
+    {
+        byte[] data = new byte[] { 0xA0, 0x05, 0xC0, 0x01, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.True((uut.status & CPUStatus.Carry) > 0);
+    }
+
+    [Fact]
+    public void test_compare_memory_with_y_reg_zero_value()
+    {
+        byte[] data = new byte[] { 0xA0, 0x05, 0xC0, 0x05, 0x00 };
 
         uut.loadAndRun(data);
 
