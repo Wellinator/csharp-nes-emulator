@@ -217,6 +217,12 @@ namespace NES_Emulator
                         INY();
                         break;
 
+                    // JMP
+                    case CPUOpcodes.JMP_Absolute:
+                    case CPUOpcodes.JMP_Indirect:
+                        JMP(opcode.mode);
+                        break;
+
                     // LDA
                     case CPUOpcodes.LDA_Immediate:
                     case CPUOpcodes.LDA_ZeroPage:
@@ -519,6 +525,31 @@ namespace NES_Emulator
         {
             register_y = (byte)(register_y + 1);
             updateZeroAndNegativeFlags(register_y);
+        }
+
+        private void JMP(CPUAddressingMode mode)
+        {
+
+            if (mode == CPUAddressingMode.Absolute)
+            {
+                ushort addr = getAddressByMode(mode);
+                program_counter = _memory.read(addr);
+            }
+            else
+            {
+                ushort addr = _memory.readU16(program_counter);
+
+                if ((addr & 0x00FF) == 0x00FF)
+                {
+                    byte lo = _memory.read(addr);
+                    byte hi = _memory.read((ushort)(addr & 0xFF00));
+                    program_counter = (ushort)((hi << 8) | lo);
+                }
+                else
+                {
+                    program_counter = _memory.readU16(addr);
+                };
+            }
         }
 
         private void TAX()
