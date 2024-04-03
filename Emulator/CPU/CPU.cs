@@ -209,6 +209,14 @@ namespace NES_Emulator
                         INC(opcode.mode);
                         break;
 
+                    case CPUOpcodes.INX:
+                        INX();
+                        break;
+
+                    case CPUOpcodes.INY:
+                        INY();
+                        break;
+
                     // LDA
                     case CPUOpcodes.LDA_Immediate:
                     case CPUOpcodes.LDA_ZeroPage:
@@ -251,10 +259,6 @@ namespace NES_Emulator
 
                     case CPUOpcodes.TAX:
                         TAX();
-                        break;
-
-                    case CPUOpcodes.INX:
-                        INX();
                         break;
 
                     default:
@@ -505,15 +509,21 @@ namespace NES_Emulator
             updateZeroAndNegativeFlags(incValue);
         }
 
-        private void TAX()
+        private void INX()
         {
-            register_x = register_acc;
+            register_x = (byte)(register_x + 1);
             updateZeroAndNegativeFlags(register_x);
         }
 
-        private void INX()
+        private void INY()
         {
-            register_x += 1;
+            register_y = (byte)(register_y + 1);
+            updateZeroAndNegativeFlags(register_y);
+        }
+
+        private void TAX()
+        {
+            register_x = register_acc;
             updateZeroAndNegativeFlags(register_x);
         }
 
