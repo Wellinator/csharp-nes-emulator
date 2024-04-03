@@ -181,6 +181,14 @@ namespace NES_Emulator
                         DEC(opcode.mode);
                         break;
 
+                    case CPUOpcodes.DEX:
+                        DEX();
+                        break;
+
+                    case CPUOpcodes.DEY:
+                        DEY();
+                        break;
+
                     // LDA
                     case CPUOpcodes.LDA_Immediate:
                     case CPUOpcodes.LDA_ZeroPage:
@@ -446,6 +454,18 @@ namespace NES_Emulator
             byte decValue = (byte)(_memory.read(addr) - 1);
             _memory.write(addr, decValue);
             updateZeroAndNegativeFlags(decValue);
+        }
+
+        private void DEX()
+        {
+            register_x = (byte)(register_x - 1);
+            updateZeroAndNegativeFlags(register_x);
+        }
+
+        private void DEY()
+        {
+            register_y = (byte)(register_y - 1);
+            updateZeroAndNegativeFlags(register_y);
         }
 
         private void TAX()
