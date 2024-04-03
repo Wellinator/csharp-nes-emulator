@@ -14,6 +14,7 @@ namespace NES_Emulator
         Indirect_X,
         Indirect_Y,
         Absolute_Indirect,
+        Indirect,
         Relative,
         NoneAddressing
     }
