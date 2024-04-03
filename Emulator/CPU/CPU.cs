@@ -159,6 +159,20 @@ namespace NES_Emulator
                         CMP(opcode.mode);
                         break;
 
+                    // CPX
+                    case CPUOpcodes.CPX_Immediate:
+                    case CPUOpcodes.CPX_ZeroPage:
+                    case CPUOpcodes.CPX_Absolute:
+                        CPX(opcode.mode);
+                        break;
+
+                    // CPY
+                    case CPUOpcodes.CPY_Immediate:
+                    case CPUOpcodes.CPY_ZeroPage:
+                    case CPUOpcodes.CPY_Absolute:
+                        CPY(opcode.mode);
+                        break;
+
                     // LDA
                     case CPUOpcodes.LDA_Immediate:
                     case CPUOpcodes.LDA_ZeroPage:
@@ -169,6 +183,23 @@ namespace NES_Emulator
                     case CPUOpcodes.LDA_Indirect_X:
                     case CPUOpcodes.LDA_Indirect_Y:
                         LDA(opcode.mode);
+                        break;
+
+                    // LDX
+                    case CPUOpcodes.LDX_Immediate:
+                    case CPUOpcodes.LDX_ZeroPage:
+                    case CPUOpcodes.LDX_Absolute:
+                    case CPUOpcodes.LDX_Absolute_Y:
+                        LDX(opcode.mode);
+                        break;
+
+                    // LDY
+                    case CPUOpcodes.LDY_Immediate:
+                    case CPUOpcodes.LDY_ZeroPage:
+                    case CPUOpcodes.LDY_ZeroPage_X:
+                    case CPUOpcodes.LDY_Absolute:
+                    case CPUOpcodes.LDY_Absolute_X:
+                        LDY(opcode.mode);
                         break;
 
                     // STA
@@ -373,13 +404,23 @@ namespace NES_Emulator
             compare(mode, register_acc);
         }
 
+        private void CPX(CPUAddressingMode mode)
+        {
+            compare(mode, register_x);
+        }
+
+        private void CPY(CPUAddressingMode mode)
+        {
+            compare(mode, register_y);
+        }
+
         private void compare(CPUAddressingMode mode, byte reg)
         {
             ushort addr = getAddressByMode(mode);
             byte value = _memory.read(addr);
-            byte result = (byte)(register_acc - value);
+            byte result = (byte)(reg - value);
 
-            if (value <= register_acc)
+            if (value <= reg)
             {
                 setStatus(CPUStatus.Carry);
             }
@@ -408,6 +449,22 @@ namespace NES_Emulator
             ushort addr = getAddressByMode(mode);
             byte value = _memory.read(addr);
             setRegisterAcc(value);
+        }
+
+        private void LDX(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+            register_x = value;
+            updateZeroAndNegativeFlags(register_x);
+        }
+
+        private void LDY(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+            register_y = value;
+            updateZeroAndNegativeFlags(register_y);
         }
 
         private void STA(CPUAddressingMode mode)
@@ -553,6 +610,7 @@ namespace NES_Emulator
         {
             register_acc = 0;
             register_x = 0;
+            register_y = 0;
             status = 0;
 
             program_counter = _memory.readU16(0xFFFC);
