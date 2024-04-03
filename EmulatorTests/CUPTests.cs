@@ -577,4 +577,38 @@ public class CPUTests
 
         Assert.Equal(255, uut.register_x);
     }
+
+    [Fact]
+    public void test_eor_exclusive_or_memory_with_accumulator()
+    {
+        byte[] data = new byte[] { 0xA9, 0x55, 0x49, 0x5F, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x0A, uut.register_acc);
+    }
+
+    [Fact]
+    public void test_inc_increment_memory_by_one()
+    {
+        byte[] data = new byte[] { 0xE6, 0x10, 0x00 };
+        mem.write(0x10, 0x01);
+
+        uut.loadAndRun(data);
+
+        var moddedValue = mem.read(0x10);
+        Assert.Equal(0x02, moddedValue);
+    }
+
+    [Fact]
+    public void test_inc_increment_memory_by_one_zero_value()
+    {
+        byte[] data = new byte[] { 0xE6, 0x10, 0x00 };
+        mem.write(0x10, 0xFF);
+
+        uut.loadAndRun(data);
+
+        var moddedValue = mem.read(0x10);
+        Assert.Equal(0x00, moddedValue);
+    }
 }
