@@ -637,4 +637,56 @@ public class CPUTests
         var moddedValue = mem.read(0x10);
         Assert.Equal(0x00, moddedValue);
     }
+
+    [Fact]
+    public void test_inx_increment_register_x_by_one()
+    {
+        byte[] data = new byte[] { 0xE8, 0x00 };
+        uut.load(data);
+        uut.reset();
+        uut.register_x = 1;
+
+        uut.run();
+
+        Assert.Equal(2, uut.register_x);
+    }
+
+    [Fact]
+    public void test_inx_increment_register_x_by_one_with_zero_value()
+    {
+        byte[] data = new byte[] { 0xE8, 0x00 };
+        uut.load(data);
+        uut.reset();
+        uut.register_x = 255;
+
+        uut.run();
+
+        Assert.Equal(0, uut.register_x);
+    }
+
+    [Fact]
+    public void test_iny_increment_register_y_by_one()
+    {
+        byte[] data = new byte[] { 0xC8, 0x00 };
+        uut.load(data);
+        uut.reset();
+        uut.register_y = 1;
+
+        uut.run();
+
+        Assert.Equal(2, uut.register_y);
+    }
+
+    [Fact]
+    public void test_iny_increment_register_y_by_one_with_zero_value()
+    {
+        byte[] data = new byte[] { 0xC8, 0x00 };
+        uut.load(data);
+        uut.reset();
+        uut.register_y = 255;
+
+        uut.run();
+
+        Assert.Equal(0, uut.register_y);
+    }
 }
