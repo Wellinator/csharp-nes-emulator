@@ -579,6 +579,32 @@ public class CPUTests
     }
 
     [Fact]
+    public void test_dey_decrement_register_y_by_one()
+    {
+        byte[] data = new byte[] { 0x88, 0x00 };
+        uut.load(data);
+        uut.reset();
+        uut.register_y = 2;
+
+        uut.run();
+
+        Assert.Equal(1, uut.register_y);
+    }
+
+    [Fact]
+    public void test_dey_decrement_register_y_by_one_with_zero_value()
+    {
+        byte[] data = new byte[] { 0x88, 0x00 };
+        uut.load(data);
+        uut.reset();
+        uut.register_y = 0;
+
+        uut.run();
+
+        Assert.Equal(255, uut.register_y);
+    }
+
+    [Fact]
     public void test_eor_exclusive_or_memory_with_accumulator()
     {
         byte[] data = new byte[] { 0xA9, 0x55, 0x49, 0x5F, 0x00 };
