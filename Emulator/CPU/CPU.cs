@@ -10,6 +10,7 @@ namespace NES_Emulator
         public byte register_x { get; set; }
         public byte status { get; set; }
         public ushort program_counter { get; set; }
+        public Stack<byte> stack { get; set; }
         public CPUInstructionTable instruction_table { get; set; }
         public void run();
         public byte setStatus(in byte Status);
@@ -32,6 +33,7 @@ namespace NES_Emulator
 
             _memory = Memory;
             instruction_table = new CPUInstructionTable();
+            stack = new Stack<byte>();
         }
 
         public byte register_acc { get; set; }
@@ -39,6 +41,7 @@ namespace NES_Emulator
         public byte register_y { get; set; }
         public byte status { get; set; }
         public ushort program_counter { get; set; }
+        public Stack<byte> stack { get; set; }
         public iMemory _memory { get; set; }
         public CPUInstructionTable instruction_table { get; set; }
 
@@ -221,6 +224,10 @@ namespace NES_Emulator
                     case CPUOpcodes.JMP_Absolute:
                     case CPUOpcodes.JMP_Indirect:
                         JMP(opcode.mode);
+                        break;
+
+                    case CPUOpcodes.JSR:
+                        JSR();
                         break;
 
                     // LDA
@@ -550,6 +557,18 @@ namespace NES_Emulator
                     program_counter = _memory.readU16(addr);
                 };
             }
+        }
+
+        private void JSR()
+        {
+            byte hi = (byte)(program_counter >> 8);
+            byte lo = (byte)(program_counter & 0xff);
+
+            stack.Push(hi);
+            stack.Push(lo);
+
+            ushort addr = _memory.readU16(program_counter);
+            program_counter = _memory.read(addr);
         }
 
         private void TAX()
