@@ -173,6 +173,14 @@ namespace NES_Emulator
                         CPY(opcode.mode);
                         break;
 
+                    // DEC
+                    case CPUOpcodes.DEC_ZeroPage:
+                    case CPUOpcodes.DEC_ZeroPage_X:
+                    case CPUOpcodes.DEC_Absolute:
+                    case CPUOpcodes.DEC_Absolute_X:
+                        DEC(opcode.mode);
+                        break;
+
                     // LDA
                     case CPUOpcodes.LDA_Immediate:
                     case CPUOpcodes.LDA_ZeroPage:
@@ -430,6 +438,14 @@ namespace NES_Emulator
             }
 
             updateZeroAndNegativeFlags(result);
+        }
+
+        private void DEC(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte decValue = (byte)(_memory.read(addr) - 1);
+            _memory.write(addr, decValue);
+            updateZeroAndNegativeFlags(decValue);
         }
 
         private void TAX()
