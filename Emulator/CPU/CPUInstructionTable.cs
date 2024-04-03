@@ -149,11 +149,11 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.INY, new CPUInstruction { opcode = CPUOpcodes.INY, mnemonic = "INY", bytes = 1, cycles = 2 });
 
             // JMP - Jump
-            lookupTable.Add(CPUOpcodes.JMP_Absolute, new CPUInstruction { opcode = CPUOpcodes.JMP_Absolute, mnemonic = "JMP", bytes = 3, cycles = 3 });
-            lookupTable.Add(CPUOpcodes.JMP_Indirect, new CPUInstruction { opcode = CPUOpcodes.JMP_Indirect, mnemonic = "JMP", bytes = 3, cycles = 5 });
+            lookupTable.Add(CPUOpcodes.JMP_Absolute, new CPUInstruction { opcode = CPUOpcodes.JMP_Absolute, mnemonic = "JMP", bytes = 3, cycles = 3, mode = CPUAddressingMode.Absolute });
+            lookupTable.Add(CPUOpcodes.JMP_Indirect, new CPUInstruction { opcode = CPUOpcodes.JMP_Indirect, mnemonic = "JMP", bytes = 3, cycles = 5, mode = CPUAddressingMode.Indirect });
 
             // JSR - Jump to Subroutine
-            lookupTable.Add(CPUOpcodes.JSR, new CPUInstruction { opcode = CPUOpcodes.JSR, mnemonic = "JSR", bytes = 3, cycles = 6 });
+            lookupTable.Add(CPUOpcodes.JSR, new CPUInstruction { opcode = CPUOpcodes.JSR, mnemonic = "JSR", bytes = 3, cycles = 6, mode = CPUAddressingMode.Absolute });
 
             // LDA - Load Accumulator
             lookupTable.Add(CPUOpcodes.LDA_Immediate, new CPUInstruction { opcode = CPUOpcodes.LDA_Immediate, mnemonic = "LDA", bytes = 2, cycles = 2, mode = CPUAddressingMode.Immediate });
