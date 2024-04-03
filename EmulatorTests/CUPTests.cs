@@ -527,4 +527,28 @@ public class CPUTests
 
         Assert.True((uut.status & CPUStatus.Zero) > 0);
     }
+
+    [Fact]
+    public void test_dec_decrement_memory_by_one()
+    {
+        byte[] data = new byte[] { 0xC6, 0x10, 0x00 };
+        mem.write(0x10, 0x02);
+
+        uut.loadAndRun(data);
+
+        var moddedValue = mem.read(0x10);
+        Assert.Equal(0x01, moddedValue);
+    }
+
+    [Fact]
+    public void test_dec_decrement_memory_by_one_zero_value()
+    {
+        byte[] data = new byte[] { 0xC6, 0x10, 0x00 };
+        mem.write(0x10, 0x00);
+
+        uut.loadAndRun(data);
+
+        var moddedValue = mem.read(0x10);
+        Assert.Equal(0xFF, moddedValue);
+    }
 }
