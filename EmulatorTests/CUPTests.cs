@@ -551,4 +551,30 @@ public class CPUTests
         var moddedValue = mem.read(0x10);
         Assert.Equal(0xFF, moddedValue);
     }
+
+    [Fact]
+    public void test_dex_decrement_register_x_by_one()
+    {
+        byte[] data = new byte[] { 0xCA, 0x00 };
+        uut.load(data);
+        uut.reset();
+        uut.register_x = 2;
+
+        uut.run();
+
+        Assert.Equal(1, uut.register_x);
+    }
+
+    [Fact]
+    public void test_dex_decrement_register_x_by_one_with_zero_value()
+    {
+        byte[] data = new byte[] { 0xCA, 0x00 };
+        uut.load(data);
+        uut.reset();
+        uut.register_x = 0;
+
+        uut.run();
+
+        Assert.Equal(255, uut.register_x);
+    }
 }
