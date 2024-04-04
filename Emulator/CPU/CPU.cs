@@ -571,14 +571,13 @@ namespace NES_Emulator
             }
         }
 
+        /// <summary>
+        /// The address (16 bits) of the last byte of the JSR (that is, the next instruction minus 1) is pushed onto the stack
+        /// The program counter jumps to the subroutine indicated.
+        ///</summary>
         private void JSR()
         {
-            byte hi = (byte)(program_counter >> 8);
-            byte lo = (byte)(program_counter & 0xff);
-
-            stack.Push(hi);
-            stack.Push(lo);
-
+            pushUshortToStack((ushort)(program_counter + 2 - 1));
             ushort addr = _memory.readU16(program_counter);
             program_counter = _memory.read(addr);
         }
