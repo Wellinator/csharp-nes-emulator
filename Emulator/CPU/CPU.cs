@@ -271,6 +271,10 @@ namespace NES_Emulator
                         LSR(opcode.mode);
                         break;
 
+                    case CPUOpcodes.RTS:
+                        RTS();
+                        break;
+
                     // STA
                     case CPUOpcodes.STA_ZeroPage:
                     case CPUOpcodes.STA_ZeroPage_X:
@@ -624,6 +628,16 @@ namespace NES_Emulator
 
             setStatus((byte)(CPUStatus.Carry & value));
             updateZeroAndNegativeFlags(rightShiftedValue);
+        }
+
+
+        /// <summary>
+        /// An address (16 bits) is popped off the stack.
+        /// The program counter jumps to this address + 1
+        ///</summary>
+        private void RTS()
+        {
+            program_counter = (ushort)(popUshortFromStack() + 1);
         }
 
         private void STA(CPUAddressingMode mode)
