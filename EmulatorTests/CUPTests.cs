@@ -689,4 +689,31 @@ public class CPUTests
 
         Assert.Equal(0, uut.register_y);
     }
+
+    [Fact]
+    public void test_lsr_shift_one_bit_right()
+    {
+        byte[] data = new byte[] { 0x46, 0x10, 0x00 };
+        mem.write(0x10, 0x0A);
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x05, mem.read(0x10));
+        Assert.Equal(0, uut.status & CPUStatus.Carry);
+        Assert.True((uut.status & CPUStatus.Negative) == 0);
+        Assert.True((uut.status & CPUStatus.Zero) == 0);
+    }
+
+    [Fact]
+    public void test_lsr_shift_one_bit_right_with_accumulator()
+    {
+        byte[] data = new byte[] { 0xA9, 0x0A, 0x4A, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x05, uut.register_acc);
+        Assert.Equal(0, uut.status & CPUStatus.Carry);
+        Assert.True((uut.status & CPUStatus.Negative) == 0);
+        Assert.True((uut.status & CPUStatus.Zero) == 0);
+    }
 }
