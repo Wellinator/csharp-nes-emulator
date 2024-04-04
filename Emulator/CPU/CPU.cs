@@ -259,6 +259,18 @@ namespace NES_Emulator
                         LDY(opcode.mode);
                         break;
 
+                    // LSR
+                    case CPUOpcodes.LSR_Accumulator:
+                        LSR();
+                        break;
+
+                    case CPUOpcodes.LSR_ZeroPage:
+                    case CPUOpcodes.LSR_ZeroPage_X:
+                    case CPUOpcodes.LSR_Absolute:
+                    case CPUOpcodes.LSR_Absolute_X:
+                        LSR(opcode.mode);
+                        break;
+
                     // STA
                     case CPUOpcodes.STA_ZeroPage:
                     case CPUOpcodes.STA_ZeroPage_X:
@@ -592,6 +604,27 @@ namespace NES_Emulator
             byte value = _memory.read(addr);
             register_y = value;
             updateZeroAndNegativeFlags(register_y);
+        }
+
+        private void LSR()
+        {
+            byte old_value = register_acc;
+            register_acc = (byte)(register_acc >> 1);
+
+            setStatus((byte)(CPUStatus.Carry & old_value));
+            updateZeroAndNegativeFlags(register_acc);
+        }
+
+        private void LSR(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+            byte rightShiftedValue = (byte)(value >> 1);
+
+            _memory.write(addr, rightShiftedValue);
+
+            setStatus((byte)(CPUStatus.Carry & value));
+            updateZeroAndNegativeFlags(rightShiftedValue);
         }
 
         private void STA(CPUAddressingMode mode)
