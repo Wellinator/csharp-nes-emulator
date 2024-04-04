@@ -795,6 +795,21 @@ namespace NES_Emulator
             reset();
             run();
         }
+
+        public void pushUshortToStack(ushort data)
+        {
+            byte hi = (byte)(data >> 8);
+            byte lo = (byte)(data & 0xff);
+            stack.Push(hi);
+            stack.Push(lo);
+        }
+
+        public ushort popUshortFromStack()
+        {
+            byte lo = stack.Pop();
+            byte hi = stack.Pop();
+            return (ushort)((hi << 8) | (lo));
+        }
     }
 
 }
