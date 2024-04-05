@@ -279,6 +279,14 @@ namespace NES_Emulator
                         ORA(opcode.mode);
                         break;
 
+                    case CPUOpcodes.PHA:
+                        PHA();
+                        break;
+
+                    case CPUOpcodes.PHP:
+                        PHP();
+                        break;
+
                     case CPUOpcodes.LSR_ZeroPage:
                     case CPUOpcodes.LSR_ZeroPage_X:
                     case CPUOpcodes.LSR_Absolute:
@@ -650,6 +658,16 @@ namespace NES_Emulator
             ushort addr = getAddressByMode(mode);
             byte value = _memory.read(addr);
             setRegisterAcc((byte)(register_acc | value));
+        }
+
+        private void PHA()
+        {
+            stack.Push(register_acc);
+        }
+
+        private void PHP()
+        {
+            stack.Push(status);
         }
 
         /// <summary>
