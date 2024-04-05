@@ -287,6 +287,14 @@ namespace NES_Emulator
                         PHP();
                         break;
 
+                    case CPUOpcodes.PLA:
+                        PLA();
+                        break;
+
+                    case CPUOpcodes.PLP:
+                        PLP();
+                        break;
+
                     case CPUOpcodes.LSR_ZeroPage:
                     case CPUOpcodes.LSR_ZeroPage_X:
                     case CPUOpcodes.LSR_Absolute:
@@ -668,6 +676,16 @@ namespace NES_Emulator
         private void PHP()
         {
             stack.Push(status);
+        }
+
+        private void PLA()
+        {
+            setRegisterAcc(stack.Pop());
+        }
+
+        private void PLP()
+        {
+            status = stack.Pop();
         }
 
         /// <summary>
