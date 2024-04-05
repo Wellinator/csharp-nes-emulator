@@ -264,6 +264,9 @@ namespace NES_Emulator
                         LSR();
                         break;
 
+                    case CPUOpcodes.NOP:
+                        break;
+
                     case CPUOpcodes.LSR_ZeroPage:
                     case CPUOpcodes.LSR_ZeroPage_X:
                     case CPUOpcodes.LSR_Absolute:
