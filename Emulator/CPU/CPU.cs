@@ -267,6 +267,18 @@ namespace NES_Emulator
                     case CPUOpcodes.NOP:
                         break;
 
+                    // ORA
+                    case CPUOpcodes.ORA_Immediate:
+                    case CPUOpcodes.ORA_ZeroPage:
+                    case CPUOpcodes.ORA_ZeroPage_X:
+                    case CPUOpcodes.ORA_Absolute:
+                    case CPUOpcodes.ORA_Absolute_X:
+                    case CPUOpcodes.ORA_Absolute_Y:
+                    case CPUOpcodes.ORA_Indirect_X:
+                    case CPUOpcodes.ORA_Indirect_Y:
+                        ORA(opcode.mode);
+                        break;
+
                     case CPUOpcodes.LSR_ZeroPage:
                     case CPUOpcodes.LSR_ZeroPage_X:
                     case CPUOpcodes.LSR_Absolute:
@@ -633,6 +645,12 @@ namespace NES_Emulator
             updateZeroAndNegativeFlags(rightShiftedValue);
         }
 
+        private void ORA(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+            setRegisterAcc((byte)(register_acc | value));
+        }
 
         /// <summary>
         /// An address (16 bits) is popped off the stack.
