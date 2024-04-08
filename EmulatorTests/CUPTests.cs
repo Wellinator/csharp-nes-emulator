@@ -716,4 +716,30 @@ public class CPUTests
         Assert.True((uut.status & CPUStatus.Negative) == 0);
         Assert.True((uut.status & CPUStatus.Zero) == 0);
     }
+
+    [Fact]
+    public void test_rol_rotate_one_bit_left_accumulator()
+    {
+        byte[] data = new byte[] { 0xA9, 0x81, 0x2A, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x02, uut.register_acc);
+        Assert.Equal(1, uut.status & CPUStatus.Carry);
+        Assert.True((uut.status & CPUStatus.Negative) == 0);
+        Assert.True((uut.status & CPUStatus.Zero) == 0);
+    }
+
+    [Fact]
+    public void test_ror_rotate_one_bit_right_accumulator()
+    {
+        byte[] data = new byte[] { 0xA9, 0x81, 0x6A, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x40, uut.register_acc);
+        Assert.Equal(1, uut.status & CPUStatus.Carry);
+        Assert.True((uut.status & CPUStatus.Negative) == 0);
+        Assert.True((uut.status & CPUStatus.Zero) == 0);
+    }
 }
