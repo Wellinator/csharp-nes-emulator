@@ -264,6 +264,13 @@ namespace NES_Emulator
                         LSR();
                         break;
 
+                    case CPUOpcodes.LSR_ZeroPage:
+                    case CPUOpcodes.LSR_ZeroPage_X:
+                    case CPUOpcodes.LSR_Absolute:
+                    case CPUOpcodes.LSR_Absolute_X:
+                        LSR(opcode.mode);
+                        break;
+
                     case CPUOpcodes.NOP:
                         break;
 
@@ -295,11 +302,28 @@ namespace NES_Emulator
                         PLP();
                         break;
 
-                    case CPUOpcodes.LSR_ZeroPage:
-                    case CPUOpcodes.LSR_ZeroPage_X:
-                    case CPUOpcodes.LSR_Absolute:
-                    case CPUOpcodes.LSR_Absolute_X:
-                        LSR(opcode.mode);
+                    // ROL
+                    case CPUOpcodes.ROL_Accumulator:
+                        ROL();
+                        break;
+
+                    case CPUOpcodes.ROL_ZeroPage:
+                    case CPUOpcodes.ROL_ZeroPage_X:
+                    case CPUOpcodes.ROL_Absolute:
+                    case CPUOpcodes.ROL_Absolute_X:
+                        ROL(opcode.mode);
+                        break;
+
+                    // ROR
+                    case CPUOpcodes.ROR_Accumulator:
+                        ROR();
+                        break;
+
+                    case CPUOpcodes.ROR_ZeroPage:
+                    case CPUOpcodes.ROR_ZeroPage_X:
+                    case CPUOpcodes.ROR_Absolute:
+                    case CPUOpcodes.ROR_Absolute_X:
+                        ROR(opcode.mode);
                         break;
 
                     case CPUOpcodes.RTS:
@@ -687,6 +711,52 @@ namespace NES_Emulator
         {
             status = stack.Pop();
         }
+
+        private void ROL()
+        {
+            register_acc = rotateOneBitLeft(register_acc);
+        }
+
+        private void ROL(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+            byte rotated = rotateOneBitLeft(value);
+            _memory.write(addr, rotated);
+        }
+
+        private byte rotateOneBitLeft(byte Value)
+        {
+            byte shiftedValue = (byte)(Value << 1);
+            byte result = (byte)(shiftedValue | (status & CPUStatus.Carry));
+            setStatus((byte)(CPUStatus.Carry & (Value >> 7)));
+            updateZeroAndNegativeFlags(result);
+            return result;
+        }
+
+        private void ROR()
+        {
+            register_acc = rotateOneBitRight(register_acc);
+        }
+
+        private void ROR(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+            byte rotated = rotateOneBitRight(value);
+            _memory.write(addr, rotated);
+        }
+
+        private byte rotateOneBitRight(byte Value)
+        {
+            byte shiftedValue = (byte)(Value >> 1);
+            byte result = (byte)(shiftedValue | ((status & CPUStatus.Carry) << 7));
+            setStatus((byte)(CPUStatus.Carry & Value));
+            updateZeroAndNegativeFlags(result);
+
+            return result;
+        }
+
 
         /// <summary>
         /// An address (16 bits) is popped off the stack.
