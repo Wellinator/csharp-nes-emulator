@@ -9,8 +9,8 @@ namespace NES_Emulator
         public byte register_acc { get; set; }
         public byte register_x { get; set; }
         public byte status { get; set; }
+        public byte stack_pointer { get; set; }
         public ushort program_counter { get; set; }
-        public Stack<byte> stack { get; set; }
         public CPUInstructionTable instruction_table { get; set; }
         public void run();
         public byte setStatus(in byte Status);
@@ -33,17 +33,20 @@ namespace NES_Emulator
 
             _memory = Memory;
             instruction_table = new CPUInstructionTable();
-            stack = new Stack<byte>();
+            stack_pointer = STACK_RESET;
         }
 
         public byte register_acc { get; set; }
         public byte register_x { get; set; }
         public byte register_y { get; set; }
         public byte status { get; set; }
+        public byte stack_pointer { get; set; }
         public ushort program_counter { get; set; }
-        public Stack<byte> stack { get; set; }
         public iMemory _memory { get; set; }
         public CPUInstructionTable instruction_table { get; set; }
+
+        private ushort STACK_START_ADDR = 0x0100;
+        private byte STACK_RESET = 0xFD;
 
         public void run()
         {
@@ -492,7 +495,7 @@ namespace NES_Emulator
 
         private void BRK()
         {
-            stack.Push(status);
+            stackPush(status);
             pushUshortToStack(program_counter);
             setBreakFlag();
         }
@@ -706,22 +709,22 @@ namespace NES_Emulator
 
         private void PHA()
         {
-            stack.Push(register_acc);
+            stackPush(register_acc);
         }
 
         private void PHP()
         {
-            stack.Push(status);
+            stackPush(status);
         }
 
         private void PLA()
         {
-            setRegisterAcc(stack.Pop());
+            setRegisterAcc(stackPop());
         }
 
         private void PLP()
         {
-            status = stack.Pop();
+            status = stackPop();
         }
 
         private void ROL()
@@ -771,7 +774,7 @@ namespace NES_Emulator
 
         private void RTI()
         {
-            status = stack.Pop();
+            status = stackPop();
             program_counter = popUshortFromStack();
         }
 
@@ -940,8 +943,8 @@ namespace NES_Emulator
             register_acc = 0;
             register_x = 0;
             register_y = 0;
-            status = 0;
-
+            status = CPUStatus.Initial;
+            stack_pointer = STACK_RESET;
             program_counter = _memory.readU16(0xFFFC);
         }
 
@@ -958,18 +961,30 @@ namespace NES_Emulator
             run();
         }
 
+        public byte stackPop()
+        {
+            stack_pointer = (byte)(stack_pointer + 1);
+            return _memory.read((ushort)(STACK_START_ADDR + stack_pointer));
+        }
+
+        public void stackPush(byte Data)
+        {
+            _memory.write((ushort)(STACK_START_ADDR + stack_pointer), Data);
+            stack_pointer = (byte)(stack_pointer - 1);
+        }
+
         public void pushUshortToStack(ushort data)
         {
             byte hi = (byte)(data >> 8);
             byte lo = (byte)(data & 0xff);
-            stack.Push(hi);
-            stack.Push(lo);
+            stackPush(hi);
+            stackPush(lo);
         }
 
         public ushort popUshortFromStack()
         {
-            byte lo = stack.Pop();
-            byte hi = stack.Pop();
+            byte lo = stackPop();
+            byte hi = stackPop();
             return (ushort)((hi << 8) | (lo));
         }
     }
