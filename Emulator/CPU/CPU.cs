@@ -326,6 +326,10 @@ namespace NES_Emulator
                         ROR(opcode.mode);
                         break;
 
+                    case CPUOpcodes.RTI:
+                        RTI();
+                        break;
+
                     case CPUOpcodes.RTS:
                         RTS();
                         break;
@@ -757,6 +761,11 @@ namespace NES_Emulator
             return result;
         }
 
+        private void RTI()
+        {
+            status = stack.Pop();
+            program_counter = popUshortFromStack();
+        }
 
         /// <summary>
         /// An address (16 bits) is popped off the stack.
