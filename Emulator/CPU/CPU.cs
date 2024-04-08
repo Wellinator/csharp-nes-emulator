@@ -124,6 +124,7 @@ namespace NES_Emulator
                         break;
 
                     case CPUOpcodes.BRK:
+                        BRK();
                         return;
 
                     case CPUOpcodes.BVC:
@@ -487,6 +488,13 @@ namespace NES_Emulator
                 sbyte displacement = (sbyte)_memory.read(program_counter);
                 program_counter = (ushort)(program_counter + displacement);
             }
+        }
+
+        private void BRK()
+        {
+            stack.Push(status);
+            pushUshortToStack(program_counter);
+            setBreakFlag();
         }
 
         private void BVC()
@@ -893,6 +901,11 @@ namespace NES_Emulator
         {
             status |= Status;
             return status;
+        }
+
+        public void setBreakFlag()
+        {
+            status |= CPUStatus.Break;
         }
 
         public byte removeStatus(in byte Status)
