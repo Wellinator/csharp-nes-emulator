@@ -350,6 +350,18 @@ namespace NES_Emulator
                         SBC(opcode.mode);
                         break;
 
+                    case CPUOpcodes.SEC:
+                        SEC();
+                        break;
+
+                    case CPUOpcodes.SED:
+                        SED();
+                        break;
+
+                    case CPUOpcodes.SEI:
+                        SEI();
+                        break;
+
                     // STA
                     case CPUOpcodes.STA_ZeroPage:
                     case CPUOpcodes.STA_ZeroPage_X:
@@ -804,6 +816,21 @@ namespace NES_Emulator
             ushort addr = getAddressByMode(mode);
             byte value = _memory.read(addr);
             addToRegisterA((byte)(~value));
+        }
+
+        private void SEC()
+        {
+            setStatus(CPUStatus.Carry);
+        }
+
+        private void SED()
+        {
+            setStatus(CPUStatus.Decimal);
+        }
+
+        private void SEI()
+        {
+            setStatus(CPUStatus.Interrupt);
         }
 
         private void STA(CPUAddressingMode mode)
