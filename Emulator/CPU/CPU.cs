@@ -338,6 +338,18 @@ namespace NES_Emulator
                         RTS();
                         break;
 
+                    // SBC
+                    case CPUOpcodes.SBC_Immediate:
+                    case CPUOpcodes.SBC_ZeroPage:
+                    case CPUOpcodes.SBC_ZeroPage_X:
+                    case CPUOpcodes.SBC_Absolute:
+                    case CPUOpcodes.SBC_Absolute_X:
+                    case CPUOpcodes.SBC_Absolute_Y:
+                    case CPUOpcodes.SBC_Indirect_X:
+                    case CPUOpcodes.SBC_Indirect_Y:
+                        SBC(opcode.mode);
+                        break;
+
                     // STA
                     case CPUOpcodes.STA_ZeroPage:
                     case CPUOpcodes.STA_ZeroPage_X:
@@ -785,6 +797,13 @@ namespace NES_Emulator
         private void RTS()
         {
             program_counter = (ushort)(popUshortFromStack() + 1);
+        }
+
+        private void SBC(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+            addToRegisterA((byte)(~value));
         }
 
         private void STA(CPUAddressingMode mode)
