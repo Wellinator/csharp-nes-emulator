@@ -391,6 +391,10 @@ namespace NES_Emulator
                         TAX();
                         break;
 
+                    case CPUOpcodes.TAY:
+                        TAY();
+                        break;
+
                     default:
                         throw new Exception($"Invalid instruction: {opcode.opcode}({opcode.mnemonic})!");
                 }
@@ -869,6 +873,12 @@ namespace NES_Emulator
         {
             register_x = register_acc;
             updateZeroAndNegativeFlags(register_x);
+        }
+
+        private void TAY()
+        {
+            register_y = register_acc;
+            updateZeroAndNegativeFlags(register_y);
         }
 
 
