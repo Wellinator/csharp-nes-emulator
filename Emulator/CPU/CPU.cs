@@ -407,6 +407,10 @@ namespace NES_Emulator
                         TXS();
                         break;
 
+                    case CPUOpcodes.TYA:
+                        TYA();
+                        break;
+
                     default:
                         throw new Exception($"Invalid instruction: {opcode.opcode}({opcode.mnemonic})!");
                 }
@@ -907,6 +911,11 @@ namespace NES_Emulator
         private void TXS()
         {
             stack_pointer = register_x;
+        }
+
+        private void TYA()
+        {
+            setRegisterAcc(register_y);
         }
 
 
