@@ -261,7 +261,7 @@ namespace NES_Emulator
 
             // STX - Store X Register
             lookupTable.Add(CPUOpcodes.STX_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.STX_ZeroPage, mnemonic = "STX", bytes = 2, cycles = 3, mode = CPUAddressingMode.ZeroPage });
-            lookupTable.Add(CPUOpcodes.STX_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.STX_ZeroPage_X, mnemonic = "STX", bytes = 2, cycles = 4, mode = CPUAddressingMode.ZeroPage_X });
+            lookupTable.Add(CPUOpcodes.STX_ZeroPage_Y, new CPUInstruction { opcode = CPUOpcodes.STX_ZeroPage_Y, mnemonic = "STX", bytes = 2, cycles = 4, mode = CPUAddressingMode.ZeroPage_X });
             lookupTable.Add(CPUOpcodes.STX_Absolute, new CPUInstruction { opcode = CPUOpcodes.STX_Absolute, mnemonic = "STX", bytes = 3, cycles = 4, mode = CPUAddressingMode.Absolute });
 
             // STY - Store Y Register
