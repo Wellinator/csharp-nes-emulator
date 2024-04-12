@@ -742,4 +742,25 @@ public class CPUTests
         Assert.True((uut.status & CPUStatus.Negative) == 0);
         Assert.True((uut.status & CPUStatus.Zero) == 0);
     }
+
+    [Fact]
+    public void test_sbc_subtract_memory_from_accumulator_with_borrow()
+    {
+        /*
+        ; $FE - $01 (-2 - +1 in decimal)
+
+        SEC       ; Set the Carry flag to indicate no borrow.
+        LDA #$01  ; Load $01 as an immediate value into the Accumulator.
+        STA $00   ; Store the Accumulator in memory at address $0000.
+        LDA #$FE  ; Load $FE as an immediate value into the Accumulator.
+        SBC $00   ; Subtract value at address $0000 from the Accumulator.
+        */
+        byte[] data = new byte[] { 0x38, 0xA9, 0x01, 0x85, 0x00, 0xA9, 0xFE, 0xE5, 0x00, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0xFD, uut.register_acc);
+        Assert.Equal(1, uut.status & CPUStatus.Carry);
+        Assert.True((uut.status & CPUStatus.Overflow) == 0);
+    }
 }
