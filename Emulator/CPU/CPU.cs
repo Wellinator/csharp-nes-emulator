@@ -373,6 +373,20 @@ namespace NES_Emulator
                         STA(opcode.mode);
                         break;
 
+                    // STX
+                    case CPUOpcodes.STX_ZeroPage:
+                    case CPUOpcodes.STX_ZeroPage_Y:
+                    case CPUOpcodes.STX_Absolute:
+                        STX(opcode.mode);
+                        break;
+
+                    // STY
+                    case CPUOpcodes.STY_ZeroPage:
+                    case CPUOpcodes.STY_ZeroPage_X:
+                    case CPUOpcodes.STY_Absolute:
+                        STY(opcode.mode);
+                        break;
+
                     case CPUOpcodes.TAX:
                         TAX();
                         break;
@@ -837,6 +851,18 @@ namespace NES_Emulator
         {
             ushort addr = getAddressByMode(mode);
             _memory.write(addr, register_acc);
+        }
+
+        private void STX(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            _memory.write(addr, register_x);
+        }
+
+        private void STY(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            _memory.write(addr, register_y);
         }
 
         private void TAX()

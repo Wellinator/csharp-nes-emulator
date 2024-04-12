@@ -240,7 +240,7 @@ namespace NES_Emulator
 
         // STX
         public const byte STX_ZeroPage = 0x86;
-        public const byte STX_ZeroPage_X = 0x96;
+        public const byte STX_ZeroPage_Y = 0x96;
         public const byte STX_Absolute = 0x8E;
 
         // STY
