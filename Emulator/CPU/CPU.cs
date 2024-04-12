@@ -395,6 +395,10 @@ namespace NES_Emulator
                         TAY();
                         break;
 
+                    case CPUOpcodes.TSX:
+                        TSX();
+                        break;
+
                     default:
                         throw new Exception($"Invalid instruction: {opcode.opcode}({opcode.mnemonic})!");
                 }
@@ -879,6 +883,12 @@ namespace NES_Emulator
         {
             register_y = register_acc;
             updateZeroAndNegativeFlags(register_y);
+        }
+
+        private void TSX()
+        {
+            register_x = stack_pointer;
+            updateZeroAndNegativeFlags(register_x);
         }
 
 
