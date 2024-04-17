@@ -480,29 +480,17 @@ namespace NES_Emulator
 
         private void BCC()
         {
-            if ((status & CPUStatus.Carry) == 0)
-            {
-                sbyte displacement = (sbyte)_memory.read(program_counter);
-                program_counter = (ushort)(program_counter + displacement);
-            }
+            branch((status & CPUStatus.Carry) == 0);
         }
 
         private void BCS()
         {
-            if ((status & CPUStatus.Carry) != 0)
-            {
-                sbyte displacement = (sbyte)_memory.read(program_counter);
-                program_counter = (ushort)(program_counter + displacement);
-            }
+            branch((status & CPUStatus.Carry) != 0);
         }
 
         private void BEQ()
         {
-            if ((status & CPUStatus.Zero) != 0)
-            {
-                sbyte displacement = (sbyte)_memory.read(program_counter);
-                program_counter = (ushort)(program_counter + displacement);
-            }
+            branch((status & CPUStatus.Zero) != 0);
         }
 
         private void BIT(CPUAddressingMode mode)
@@ -526,29 +514,17 @@ namespace NES_Emulator
 
         private void BMI()
         {
-            if ((status & CPUStatus.Negative) != 0)
-            {
-                sbyte displacement = (sbyte)_memory.read(program_counter);
-                program_counter = (ushort)(program_counter + displacement);
-            }
+            branch((status & CPUStatus.Negative) != 0);
         }
 
         private void BNE()
         {
-            if ((status & CPUStatus.Zero) == 0)
-            {
-                sbyte displacement = (sbyte)_memory.read(program_counter);
-                program_counter = (ushort)(program_counter + displacement);
-            }
+            branch((status & CPUStatus.Zero) == 0);
         }
 
         private void BPL()
         {
-            if ((status & CPUStatus.Negative) == 0)
-            {
-                sbyte displacement = (sbyte)_memory.read(program_counter);
-                program_counter = (ushort)(program_counter + displacement);
-            }
+            branch((status & CPUStatus.Negative) == 0);
         }
 
         private void BRK()
@@ -560,20 +536,12 @@ namespace NES_Emulator
 
         private void BVC()
         {
-            if ((status & CPUStatus.Overflow) == 0)
-            {
-                sbyte displacement = (sbyte)_memory.read(program_counter);
-                program_counter = (ushort)(program_counter + displacement);
-            }
+            branch((status & CPUStatus.Overflow) == 0);
         }
 
         private void BVS()
         {
-            if ((status & CPUStatus.Overflow) != 0)
-            {
-                sbyte displacement = (sbyte)_memory.read(program_counter);
-                program_counter = (ushort)(program_counter + displacement);
-            }
+            branch((status & CPUStatus.Overflow) != 0);
         }
 
         private void CLC()
@@ -1069,7 +1037,16 @@ namespace NES_Emulator
             _memory.writeU16(0xFFFC, 0x8000);
         }
 
-        public void loadAndRun(byte[] Program)
+        public void branch(bool condition)
+        {
+            if (condition)
+            {
+                sbyte displacement = (sbyte)_memory.read(program_counter);
+                program_counter = (ushort)(program_counter + 1 + displacement);
+            }
+        }
+
+        public void loadAndRun(byte[] Program, OnUpdateCallBack callback)
         {
             load(Program);
             reset();
