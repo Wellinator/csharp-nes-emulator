@@ -105,7 +105,7 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.CMP_Indirect_Y, new CPUInstruction { opcode = CPUOpcodes.CMP_Indirect_Y, mnemonic = "CMP", bytes = 2, cycles = 5,/*(+1 if page crossed)*/ mode = CPUAddressingMode.Indirect_Y });
 
             // CPX - Compare X Register
-            lookupTable.Add(CPUOpcodes.CPX_Immediate, new CPUInstruction { opcode = CPUOpcodes.CPX_ZeroPage, mnemonic = "CPX", bytes = 2, cycles = 2, mode = CPUAddressingMode.Immediate });
+            lookupTable.Add(CPUOpcodes.CPX_Immediate, new CPUInstruction { opcode = CPUOpcodes.CPX_Immediate, mnemonic = "CPX", bytes = 2, cycles = 2, mode = CPUAddressingMode.Immediate });
             lookupTable.Add(CPUOpcodes.CPX_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.CPX_ZeroPage, mnemonic = "CPX", bytes = 2, cycles = 3, mode = CPUAddressingMode.ZeroPage });
             lookupTable.Add(CPUOpcodes.CPX_Absolute, new CPUInstruction { opcode = CPUOpcodes.CPX_Absolute, mnemonic = "CPX", bytes = 3, cycles = 4, mode = CPUAddressingMode.Absolute });
 
