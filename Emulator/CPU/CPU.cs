@@ -651,8 +651,7 @@ namespace NES_Emulator
 
             if (mode == CPUAddressingMode.Absolute)
             {
-                ushort addr = getAddressByMode(mode);
-                program_counter = _memory.read(addr);
+                program_counter = getAddressByMode(mode);
             }
             else
             {
@@ -678,8 +677,7 @@ namespace NES_Emulator
         private void JSR()
         {
             pushUshortToStack((ushort)(program_counter + 2 - 1));
-            ushort addr = _memory.readU16(program_counter);
-            program_counter = _memory.read(addr);
+            program_counter = _memory.readU16(program_counter);
         }
 
         private void LDA(CPUAddressingMode mode)
