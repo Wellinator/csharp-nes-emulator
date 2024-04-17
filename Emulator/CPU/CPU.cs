@@ -941,37 +941,37 @@ namespace NES_Emulator
 
                 case CPUAddressingMode.ZeroPage_X:
                     pos = _memory.read(program_counter);
-                    addr = (ushort)((pos + register_x) % 0xFF);
+                    addr = (ushort)((pos + register_x));
                     return addr;
 
                 case CPUAddressingMode.ZeroPage_Y:
                     pos = _memory.read(program_counter);
-                    addr = (ushort)((pos + register_x) % 0xFF);
+                    addr = (ushort)((pos + register_x));
                     return addr;
 
                 case CPUAddressingMode.Absolute_X:
                     addr_base = _memory.readU16(program_counter);
-                    addr = (ushort)((addr_base + register_x) % 0xFF);
+                    addr = (ushort)((addr_base + register_x));
                     return addr;
 
                 case CPUAddressingMode.Absolute_Y:
                     addr_base = _memory.readU16(program_counter);
-                    addr = (ushort)((addr_base + register_y) % 0xFF);
+                    addr = (ushort)((addr_base + register_y));
                     return addr;
 
                 case CPUAddressingMode.Indirect_X:
                     addr_base = _memory.read(program_counter);
-                    ptr = (byte)((addr_base + register_x) % 0xFF);
+                    ptr = (byte)((addr_base + register_x));
                     lo = _memory.read(ptr);
-                    hi = _memory.read((ushort)((addr_base + 1) % 0xFF));
+                    hi = _memory.read((ushort)((addr_base + 1)));
                     return (ushort)(hi << 8 | lo);
 
                 case CPUAddressingMode.Indirect_Y:
                     addr_base = _memory.read(program_counter);
                     lo = _memory.read(addr_base);
-                    hi = _memory.read((ushort)((addr_base + 1) % 0xFF));
+                    hi = _memory.read((ushort)((addr_base + 1)));
                     ushort deref_base = (ushort)(hi << 8 | lo);
-                    ushort deref = (ushort)((deref_base + register_y) % 0xFF);
+                    ushort deref = (ushort)((deref_base + register_y));
                     return deref;
 
                 default:
