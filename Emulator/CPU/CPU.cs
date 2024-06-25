@@ -661,9 +661,11 @@ namespace NES_Emulator
         private void JMP(CPUAddressingMode mode)
         {
 
+
             if (mode == CPUAddressingMode.Absolute)
             {
-                program_counter = getAddressByMode(mode);
+                ushort addr = getAddressByMode(mode);
+                program_counter = addr;
             }
             else
             {
@@ -688,8 +690,20 @@ namespace NES_Emulator
         ///</summary>
         private void JSR()
         {
-            pushUshortToStack((ushort)(program_counter + 2 - 1));
-            program_counter = _memory.readU16(program_counter);
+            var tempPC = program_counter;
+            var subAddr = _memory.readU16(ref tempPC);
+            pushUshortToStack((ushort)(tempPC - 1));
+            program_counter = subAddr;
+        }
+
+
+        /// <summary>
+        /// An address (16 bits) is popped off the stack.
+        /// The program counter jumps to this address + 1
+        ///</summary>
+        private void RTS()
+        {
+            program_counter = (ushort)(popUshortFromStack() + 1);
         }
 
         private void LDA(CPUAddressingMode mode)
@@ -827,15 +841,6 @@ namespace NES_Emulator
         {
             status = stackPop();
             program_counter = popUshortFromStack();
-        }
-
-        /// <summary>
-        /// An address (16 bits) is popped off the stack.
-        /// The program counter jumps to this address + 1
-        ///</summary>
-        private void RTS()
-        {
-            program_counter = (ushort)(popUshortFromStack() + 1);
         }
 
         private void SBC(CPUAddressingMode mode)
