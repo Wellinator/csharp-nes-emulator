@@ -926,9 +926,9 @@ namespace NES_Emulator
 
         private void addToRegisterA(byte data)
         {
-            int sum = register_acc + data + (status & CPUStatus.Carry);
-
-            bool carry = sum > 0xFF;
+            int sum = (sbyte)register_acc + (sbyte)data + (sbyte)(status & CPUStatus.Carry);
+            bool overflow = sum < -128 || sum > 127;
+            bool carry = (register_acc + data + (((status & CPUStatus.Carry) != 0) ? 1 : 0)) > 0xFF;
 
             if (carry)
             {
@@ -939,7 +939,7 @@ namespace NES_Emulator
                 removeStatus(CPUStatus.Carry);
             }
 
-            if ((~(register_acc ^ data) & (register_acc ^ sum) & 0x80) != 0)
+            if(overflow)
             {
                 setStatus(CPUStatus.Overflow);
             }
@@ -948,7 +948,8 @@ namespace NES_Emulator
                 removeStatus(CPUStatus.Overflow);
             }
 
-            setRegisterAcc((byte)sum);
+            byte result = (byte)(sum & 0xFF);
+            setRegisterAcc(result);
         }
 
         private ushort getAddressByMode(CPUAddressingMode mode)
