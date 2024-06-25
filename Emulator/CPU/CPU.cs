@@ -54,6 +54,8 @@ namespace NES_Emulator
             {
 
                 byte instruction = _memory.read(program_counter);
+                if (instruction == CPUOpcodes.BRK)
+                    return;
                 program_counter++;
 
                 ushort program_counter_state = program_counter;
@@ -125,10 +127,6 @@ namespace NES_Emulator
                     case CPUOpcodes.BPL_Relative:
                         BPL();
                         break;
-
-                    case CPUOpcodes.BRK:
-                        BRK();
-                        return;
 
                     case CPUOpcodes.BVC:
                         BVC();
