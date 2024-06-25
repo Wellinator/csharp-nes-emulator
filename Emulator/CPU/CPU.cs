@@ -493,8 +493,8 @@ namespace NES_Emulator
         private void BIT(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
-            byte result = (byte)(register_acc & value);
+            byte data = _memory.read(addr);
+            byte result = (byte)(register_acc & data);
 
             if (result == 0x00)
             {
@@ -505,8 +505,23 @@ namespace NES_Emulator
                 removeStatus(CPUStatus.Zero);
             }
 
-            setStatus((byte)(CPUStatus.Overflow & value));
-            setStatus((byte)(CPUStatus.Negative & value));
+            if ((CPUStatus.Negative & data) > 0)
+            {
+                setStatus(CPUStatus.Negative);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Negative);
+            }
+
+            if ((CPUStatus.Overflow & data) > 0)
+            {
+                setStatus(CPUStatus.Overflow);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Overflow);
+            }
         }
 
         private void BMI()
