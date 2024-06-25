@@ -440,9 +440,8 @@ namespace NES_Emulator
         private void ASL()
         {
             byte value = register_acc;
-            byte result = (byte)(value << 1);
-
-            bool is7thBitSet = (value & 0x80) > 0;
+            
+            bool is7thBitSet = (value >> 7) == 1;
             if (is7thBitSet)
             {
                 setStatus(CPUStatus.Carry);
@@ -452,17 +451,16 @@ namespace NES_Emulator
                 removeStatus(CPUStatus.Carry);
             }
 
+            byte result = (byte)(value << 1);
             setRegisterAcc(result);
         }
 
         private void ASL(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
+            byte old_value = _memory.read(addr);
 
-            byte result = (byte)(value << 1);
-
-            bool is7thBitSet = (value & 0x80) > 0;
+            bool is7thBitSet = (old_value >> 7) == 1;
             if (is7thBitSet)
             {
                 setStatus(CPUStatus.Carry);
@@ -472,6 +470,7 @@ namespace NES_Emulator
                 removeStatus(CPUStatus.Carry);
             }
 
+            byte result = (byte)(old_value << 1);
             _memory.write(addr, result);
             updateZeroAndNegativeFlags(result);
         }
