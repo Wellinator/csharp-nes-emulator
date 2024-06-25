@@ -154,16 +154,54 @@ public class CPUTests
         Assert.Equal(0x00, uut.status & CPUStatus.Carry);
     }
 
+    /**
+    C=0, A=$FE: ADC #1   gives $FF, and C remains clear because you did not exceed what you can represent in 8 bits.
+    C=1, A=$FE: ADC #0   gives $FF, and C  gets cleared because you did not exceed what you can represent in 8 bits.
+    C=1, A=$FE: ADC #1   gives $00; but since the answer is $100, the 1 goes to the C flag, so it is set.
+    C=0, A=$FE: ADC #$10 gives $0E; but since the answer is $10E, the 1 goes to the C flag, so it is set.
+    */
     [Fact]
-    public void test_add_memory_to_accumulator_with_carry_overflow()
+    public void test_add_memory_to_accumulator_with_carry_overflow_1()
     {
-        byte[] data = new byte[] { 0x18, 0xA9, 0xFE, 0x6D, 0x10, 0x00 };
+        byte[] data = new byte[] { 0x18, 0xA9, 0xFE, 0x69, 0x01, 0x00 };
 
-        mem.write(0x10, 0x55);
         uut.loadAndRun(data);
 
-        Assert.Equal(0x54, uut.register_acc);
-        Assert.NotEqual(0x00, uut.status & CPUStatus.Carry);
+        Assert.Equal(0xFF, uut.register_acc);
+        Assert.Equal(0x00, uut.status & CPUStatus.Carry);
+    }
+
+    [Fact]
+    public void test_add_memory_to_accumulator_with_carry_overflow_2()
+    {
+        byte[] data = new byte[] { 0x38, 0xA9, 0xFE, 0x69, 0x00, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0xFF, uut.register_acc);
+        Assert.Equal(0x00, uut.status & CPUStatus.Carry);
+    }
+
+    [Fact]
+    public void test_add_memory_to_accumulator_with_carry_overflow_3()
+    {
+        byte[] data = new byte[] { 0x38, 0xA9, 0xFE, 0x69, 0x01, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x00, uut.register_acc);
+        Assert.Equal(0x01, uut.status & CPUStatus.Carry);
+    }
+
+    [Fact]
+    public void test_add_memory_to_accumulator_with_carry_overflow_4()
+    {
+        byte[] data = new byte[] { 0x18, 0xA9, 0xFE, 0x69, 0x10, 0x00 };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x0E, uut.register_acc);
+        Assert.Equal(0x01, uut.status & CPUStatus.Carry);
     }
 
     [Fact]
