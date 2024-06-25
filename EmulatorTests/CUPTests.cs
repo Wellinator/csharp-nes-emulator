@@ -770,4 +770,53 @@ public class CPUTests
         Assert.Equal(1, uut.status & CPUStatus.Carry);
         Assert.True((uut.status & CPUStatus.Overflow) == 0);
     }
+
+    [Fact]
+    public void test_jsr_and_rts()
+    {
+        byte[] data = new byte[] {
+            CPUOpcodes.JSR,
+            0x00,
+            0x80,
+            CPUOpcodes.LDA_Immediate,
+            0x42
+        };
+
+        mem.write(0x8000, CPUOpcodes.RTS);
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x42, uut.register_acc);
+    }
+
+    [Fact]
+    public void test_absolute_jmp()
+    {
+        byte[] data = new byte[] {
+            CPUOpcodes.JMP_Absolute,
+            0x00,
+            0x80
+        };
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x8000, uut.program_counter);
+    }
+
+    [Fact]
+    public void test_indirect_jmp()
+    {
+        byte[] data = new byte[] {
+            CPUOpcodes.JMP_Indirect,
+            0x00,
+            0x80,
+        };
+
+        mem.write(0x8000, 0x00);
+        mem.write(0x8001, 0x90);
+
+        uut.loadAndRun(data);
+
+        Assert.Equal(0x9000, uut.program_counter);
+    }
 }
