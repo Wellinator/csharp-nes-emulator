@@ -1073,7 +1073,7 @@ namespace NES_Emulator
             if (condition)
             {
                 sbyte displacement = (sbyte)_memory.read(program_counter);
-                program_counter = (ushort)(program_counter + 1 + displacement);
+                program_counter = (ushort)(program_counter + displacement + 1);
             }
         }
 
