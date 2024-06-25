@@ -201,7 +201,14 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_branch_if_carry_clear()
     {
-        byte[] data = new byte[] { 0x90, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+        byte[] data = new byte[] { 
+            CPUOpcodes.BCC_Relative, 
+            0x01, 
+            0x00, 
+            CPUOpcodes.LDA_Immediate, 
+            0x05, 
+            0x00 
+        };
 
         uut.loadAndRun(data);
 
@@ -227,7 +234,7 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_branch_if_carry_set()
     {
-        byte[] data = new byte[] { 0xB0, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+        byte[] data = new byte[] { 0xB0, 0x01, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
         uut.reset();
@@ -254,7 +261,7 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_branch_if_zero_set()
     {
-        byte[] data = new byte[] { 0xF0, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+        byte[] data = new byte[] { 0xF0, 0x01, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
         uut.reset();
@@ -303,7 +310,7 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_branch_if_negative_set()
     {
-        byte[] data = new byte[] { 0x30, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+        byte[] data = new byte[] { 0x30, 0x01, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
         uut.reset();
@@ -329,7 +336,7 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_branch_if_zero_flag_clear()
     {
-        byte[] data = new byte[] { 0xD0, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+        byte[] data = new byte[] { 0xD0, 0x01, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.loadAndRun(data);
 
@@ -355,7 +362,7 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_branch_if_negative_is_clear()
     {
-        byte[] data = new byte[] { 0x10, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+        byte[] data = new byte[] { 0x10, 0x01, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.loadAndRun(data);
 
@@ -381,7 +388,7 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_branch_if_overflow_is_clear()
     {
-        byte[] data = new byte[] { 0x50, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+        byte[] data = new byte[] { 0x50, 0x01, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.loadAndRun(data);
 
@@ -407,7 +414,7 @@ public class CPUTests
     [Trait("Category", "Branch")]
     public void test_branch_if_overflow_set()
     {
-        byte[] data = new byte[] { 0x70, 0x02, 0x00, 0xa9, 0x05, 0x00 };
+        byte[] data = new byte[] { 0x70, 0x01, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
         uut.reset();
