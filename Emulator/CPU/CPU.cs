@@ -718,21 +718,36 @@ namespace NES_Emulator
         private void LSR()
         {
             byte old_value = register_acc;
-            register_acc = (byte)(register_acc >> 1);
 
-            setStatus((byte)(CPUStatus.Carry & old_value));
-            updateZeroAndNegativeFlags(register_acc);
+            if((old_value & CPUStatus.Carry) == 1)
+            {
+                setStatus(CPUStatus.Carry);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Carry);
+            }
+
+            setRegisterAcc((byte)(register_acc >> 1));
+            //updateZeroAndNegativeFlags(register_acc);
         }
 
         private void LSR(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
-            byte rightShiftedValue = (byte)(value >> 1);
+            byte old_value = _memory.read(addr);
 
+            if ((old_value & CPUStatus.Carry) == 1)
+            {
+                setStatus(CPUStatus.Carry);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Carry);
+            }
+
+            byte rightShiftedValue = (byte)(old_value >> 1);
             _memory.write(addr, rightShiftedValue);
-
-            setStatus((byte)(CPUStatus.Carry & value));
             updateZeroAndNegativeFlags(rightShiftedValue);
         }
 
