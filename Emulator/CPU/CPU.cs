@@ -114,6 +114,16 @@ namespace NES_Emulator
                         ASL(opcode.mode);
                         break;
 
+                    // ASR
+                    case CPUOpcodes.ASR_Accumulator:
+                        ASR();
+                        break;
+
+                    case CPUOpcodes.ASR_ZeroPage:
+                    case CPUOpcodes.ASR_ZeroPage_X:
+                        ASR(opcode.mode);
+                        break;
+
                     case CPUOpcodes.BCC_Relative:
                         BCC();
                         break;
@@ -126,8 +136,11 @@ namespace NES_Emulator
                         BEQ();
                         break;
 
-                    case CPUOpcodes.BIT_ZeroPage:
+                    case CPUOpcodes.BIT_Immediate:
                     case CPUOpcodes.BIT_Absolute:
+                    case CPUOpcodes.BIT_Absolute_X:
+                    case CPUOpcodes.BIT_ZeroPage:
+                    case CPUOpcodes.BIT_ZeroPage_X:
                         BIT(opcode.mode);
                         break;
 
@@ -222,6 +235,9 @@ namespace NES_Emulator
                         break;
 
                     // INC
+                    case CPUOpcodes.INC_Accumulator:
+                        INC();
+                        break;
                     case CPUOpcodes.INC_ZeroPage:
                     case CPUOpcodes.INC_ZeroPage_X:
                     case CPUOpcodes.INC_Absolute:
@@ -262,6 +278,7 @@ namespace NES_Emulator
                     // LDX
                     case CPUOpcodes.LDX_Immediate:
                     case CPUOpcodes.LDX_ZeroPage:
+                    case CPUOpcodes.LDX_ZeroPage_Y:
                     case CPUOpcodes.LDX_Absolute:
                     case CPUOpcodes.LDX_Absolute_Y:
                         LDX(opcode.mode);
@@ -400,6 +417,14 @@ namespace NES_Emulator
                         STY(opcode.mode);
                         break;
 
+                    // STZ
+                    case CPUOpcodes.STZ_ZeroPage:
+                    case CPUOpcodes.STZ_ZeroPage_X:
+                    case CPUOpcodes.STZ_Absolute:
+                    case CPUOpcodes.STZ_Absolute_X:
+                        STZ(opcode.mode);
+                        break;
+
                     case CPUOpcodes.TAX:
                         TAX();
                         break;
@@ -424,8 +449,18 @@ namespace NES_Emulator
                         TYA();
                         break;
 
+                    case CPUOpcodes.TRB_ZeroPage:
+                    case CPUOpcodes.TRB_Absolute:
+                        TRB(opcode.mode);
+                        break;
+
+                    case CPUOpcodes.TSB_ZeroPage:
+                    case CPUOpcodes.TSB_Absolute:
+                        TSB(opcode.mode);
+                        break;
+
                     default:
-                        throw new Exception($"Invalid instruction: {opcode.opcode}({opcode.mnemonic})!");
+                        throw new Exception($"Invalid instruction: {opcode.opcode:X2}({opcode.mnemonic})!");
                 }
 
                 if (program_counter_state == program_counter)
@@ -653,6 +688,12 @@ namespace NES_Emulator
             updateZeroAndNegativeFlags(register_acc);
         }
 
+        private void INC()
+        {
+            byte incValue = (byte)(register_acc + 1);
+            setRegisterAcc(incValue);
+        }
+
         private void INC(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
@@ -780,6 +821,80 @@ namespace NES_Emulator
             updateZeroAndNegativeFlags(rightShiftedValue);
         }
 
+        private void ASR()
+        {
+            byte old_value = register_acc;
+
+            if ((old_value & CPUStatus.Carry) == 1)
+            {
+                setStatus(CPUStatus.Carry);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Carry);
+            }
+
+            register_acc = (byte)(register_acc >> 1);
+
+            if (register_acc == 0)
+            {
+                setStatus(CPUStatus.Zero);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Zero);
+            }
+
+            bool was7thBitSet = (old_value >> 7) == 1;
+            if (was7thBitSet)
+            {
+                setStatus(CPUStatus.Negative);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Negative);
+            }
+        }
+
+        private void ASR(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte old_value = _memory.read(addr);
+
+            if ((old_value & CPUStatus.Carry) == 1)
+            {
+                setStatus(CPUStatus.Carry);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Carry);
+            }
+
+            byte result = (byte)(old_value << 1);
+            _memory.write(addr, result);
+
+            if (result == 0)
+            {
+                setStatus(CPUStatus.Zero);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Zero);
+            }
+
+            bool was7thBitSet = (old_value >> 7) == 1;
+            if (was7thBitSet)
+            {
+                setStatus(CPUStatus.Negative);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Negative);
+            }
+        }
+
+
+
         private void ORA(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
@@ -898,6 +1013,12 @@ namespace NES_Emulator
             _memory.write(addr, register_y);
         }
 
+        private void STZ(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            _memory.write(addr, (byte)(status & CPUStatus.Zero));
+        }
+
         private void TAX()
         {
             register_x = register_acc;
@@ -929,6 +1050,44 @@ namespace NES_Emulator
         private void TYA()
         {
             setRegisterAcc(register_y);
+        }
+
+
+
+        private void TRB(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+
+            byte testResult = (byte)(~register_acc & value);
+            _memory.write(addr, testResult);
+
+            if (testResult == 0)
+            {
+                setStatus(CPUStatus.Zero);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Zero);
+            }
+        }
+
+        private void TSB(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+
+            byte testResult = (byte)(register_acc | value);
+            _memory.write(addr, testResult);
+
+            if (testResult == 0)
+            {
+                setStatus(CPUStatus.Zero);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Zero);
+            }
         }
 
 

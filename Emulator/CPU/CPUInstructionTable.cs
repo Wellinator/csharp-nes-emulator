@@ -61,8 +61,11 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.BEQ_Relative, new CPUInstruction { opcode = CPUOpcodes.BEQ_Relative, mnemonic = "BEQ", bytes = 2, cycles = 2 /*(+1 if branch succeeds +2 if to a new page)*/, mode = CPUAddressingMode.Relative });
 
             // BIT - Bit Test
-            lookupTable.Add(CPUOpcodes.BIT_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.BIT_ZeroPage, mnemonic = "BIT", bytes = 2, cycles = 3, mode = CPUAddressingMode.ZeroPage });
-            lookupTable.Add(CPUOpcodes.BIT_Absolute, new CPUInstruction { opcode = CPUOpcodes.BIT_Absolute, mnemonic = "BIT", bytes = 3, cycles = 4, mode = CPUAddressingMode.Absolute });
+            lookupTable.Add(CPUOpcodes.BIT_Immediate, new CPUInstruction { opcode = CPUOpcodes.BIT_Immediate, mnemonic = "BIT", bytes = 2, cycles = 2, mode = CPUAddressingMode.Immediate });
+            lookupTable.Add(CPUOpcodes.BIT_Absolute, new CPUInstruction { opcode = CPUOpcodes.BIT_Absolute, mnemonic = "BIT", bytes = 3, cycles = 3, mode = CPUAddressingMode.Absolute });
+            lookupTable.Add(CPUOpcodes.BIT_Absolute_X, new CPUInstruction { opcode = CPUOpcodes.BIT_Absolute_X, mnemonic = "BIT", bytes = 3, cycles = 3, mode = CPUAddressingMode.Absolute_X });
+            lookupTable.Add(CPUOpcodes.BIT_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.BIT_ZeroPage, mnemonic = "BIT", bytes = 2, cycles = 2, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.BIT_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.BIT_ZeroPage_X, mnemonic = "BIT", bytes = 2, cycles = 2, mode = CPUAddressingMode.ZeroPage_X });
 
             // BMI - Branch if Minus
             lookupTable.Add(CPUOpcodes.BMI_Relative, new CPUInstruction { opcode = CPUOpcodes.BMI_Relative, mnemonic = "BMI", bytes = 2, cycles = 2 /*(+1 if branch succeeds +2 if to a new page)*/, mode = CPUAddressingMode.Relative });
@@ -137,6 +140,7 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.EOR_Indirect_Y, new CPUInstruction { opcode = CPUOpcodes.EOR_Indirect_Y, mnemonic = "EOR", bytes = 2, cycles = 5,/*(+1 if page crossed)*/ mode = CPUAddressingMode.Indirect_Y });
 
             // INC - Increment Memory
+            lookupTable.Add(CPUOpcodes.INC_Accumulator, new CPUInstruction { opcode = CPUOpcodes.INC_Accumulator, mnemonic = "INC", bytes = 1, cycles = 1, mode = CPUAddressingMode.Accumulator });
             lookupTable.Add(CPUOpcodes.INC_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.INC_ZeroPage, mnemonic = "INC", bytes = 2, cycles = 5, mode = CPUAddressingMode.ZeroPage });
             lookupTable.Add(CPUOpcodes.INC_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.INC_ZeroPage_X, mnemonic = "INC", bytes = 2, cycles = 6, mode = CPUAddressingMode.ZeroPage_X });
             lookupTable.Add(CPUOpcodes.INC_Absolute, new CPUInstruction { opcode = CPUOpcodes.INC_Absolute, mnemonic = "INC", bytes = 3, cycles = 6, mode = CPUAddressingMode.Absolute });
@@ -185,6 +189,11 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.LSR_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.LSR_ZeroPage_X, mnemonic = "LSR", bytes = 2, cycles = 6, mode = CPUAddressingMode.ZeroPage_X });
             lookupTable.Add(CPUOpcodes.LSR_Absolute, new CPUInstruction { opcode = CPUOpcodes.LSR_Absolute, mnemonic = "LSR", bytes = 3, cycles = 6, mode = CPUAddressingMode.Absolute });
             lookupTable.Add(CPUOpcodes.LSR_Absolute_X, new CPUInstruction { opcode = CPUOpcodes.LSR_Absolute_X, mnemonic = "LSR", bytes = 3, cycles = 7, mode = CPUAddressingMode.Absolute_X });
+
+            // ASR - Arithmetic Shift Right
+            lookupTable.Add(CPUOpcodes.ASR_Accumulator, new CPUInstruction { opcode = CPUOpcodes.ASR_Accumulator, mnemonic = "ASR", bytes = 1, cycles = 1, mode = CPUAddressingMode.Accumulator });
+            lookupTable.Add(CPUOpcodes.ASR_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.ASR_ZeroPage, mnemonic = "ASR", bytes = 2, cycles = 2, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.ASR_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.ASR_ZeroPage_X, mnemonic = "ASR", bytes = 2, cycles = 2, mode = CPUAddressingMode.ZeroPage_X });
 
             // NOP - No Operation
             lookupTable.Add(CPUOpcodes.NOP, new CPUInstruction { opcode = CPUOpcodes.NOP, mnemonic = "NOP", bytes = 1, cycles = 2 });
@@ -269,6 +278,12 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.STY_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.STY_ZeroPage_X, mnemonic = "STY", bytes = 2, cycles = 4, mode = CPUAddressingMode.ZeroPage_X });
             lookupTable.Add(CPUOpcodes.STY_Absolute, new CPUInstruction { opcode = CPUOpcodes.STY_Absolute, mnemonic = "STY", bytes = 3, cycles = 4, mode = CPUAddressingMode.Absolute });
 
+            // STZ - Store Accumulator
+            lookupTable.Add(CPUOpcodes.STZ_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.STZ_ZeroPage, mnemonic = "STZ", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.STZ_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.STZ_ZeroPage_X, mnemonic = "STZ", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage_X });
+            lookupTable.Add(CPUOpcodes.STZ_Absolute, new CPUInstruction { opcode = CPUOpcodes.STZ_Absolute, mnemonic = "STZ", bytes = 2, cycles = 2, mode = CPUAddressingMode.Absolute });
+            lookupTable.Add(CPUOpcodes.STZ_Absolute_X, new CPUInstruction { opcode = CPUOpcodes.STZ_Absolute_X, mnemonic = "STZ", bytes = 2, cycles = 2, mode = CPUAddressingMode.Absolute_X });
+
             // TAX - Transfer Accumulator to X
             lookupTable.Add(CPUOpcodes.TAX, new CPUInstruction { opcode = CPUOpcodes.TAX, mnemonic = "TAX", bytes = 1, cycles = 2 });
 
@@ -286,6 +301,14 @@ namespace NES_Emulator
 
             // TYA - Transfer Y to Accumulator
             lookupTable.Add(CPUOpcodes.TYA, new CPUInstruction { opcode = CPUOpcodes.TYA, mnemonic = "TYA", bytes = 1, cycles = 2 });
+
+            // TRB - Test And Set Memory Bits With Accumulator
+            lookupTable.Add(CPUOpcodes.TRB_Absolute, new CPUInstruction { opcode = CPUOpcodes.TRB_Absolute, mnemonic = "TRB", bytes = 3, cycles = 3 });
+            lookupTable.Add(CPUOpcodes.TRB_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.TRB_ZeroPage, mnemonic = "TRB", bytes = 2, cycles = 2 });
+
+            // TSB - Test And Set Memory Bits With Accumulator
+            lookupTable.Add(CPUOpcodes.TSB_Absolute, new CPUInstruction { opcode = CPUOpcodes.TSB_Absolute, mnemonic = "TSB", bytes = 3, cycles = 3 });
+            lookupTable.Add(CPUOpcodes.TSB_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.TSB_ZeroPage, mnemonic = "TSB", bytes = 2, cycles = 2 });
         }
     }
 }

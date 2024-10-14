@@ -30,6 +30,12 @@ namespace NES_Emulator
         public const byte ASL_Absolute = 0x0E;
         public const byte ASL_Absolute_X = 0x1E;
 
+        // ASR
+        public const byte ASR_Accumulator = 0x43;
+        public const byte ASR_ZeroPage = 0x44;
+        public const byte ASR_ZeroPage_X = 0x54;
+
+
         // BCC
         public const byte BCC_Relative = 0x90;
 
@@ -40,8 +46,11 @@ namespace NES_Emulator
         public const byte BEQ_Relative = 0xF0;
 
         // BIT
-        public const byte BIT_ZeroPage = 0x24;
+        public const byte BIT_Immediate = 0x89;
         public const byte BIT_Absolute = 0x2C;
+        public const byte BIT_Absolute_X = 0x3C;
+        public const byte BIT_ZeroPage = 0x24;
+        public const byte BIT_ZeroPage_X = 0x34;
 
         // BMI
         public const byte BMI_Relative = 0x30;
@@ -116,6 +125,7 @@ namespace NES_Emulator
         public const byte EOR_Indirect_Y = 0x51;
 
         // INC
+        public const byte INC_Accumulator = 0x1A;
         public const byte INC_ZeroPage = 0xE6;
         public const byte INC_ZeroPage_X = 0xF6;
         public const byte INC_Absolute = 0xEE;
@@ -248,6 +258,12 @@ namespace NES_Emulator
         public const byte STY_ZeroPage_X = 0x94;
         public const byte STY_Absolute = 0x8C;
 
+        // STZ
+        public const byte STZ_ZeroPage = 0x64;
+        public const byte STZ_ZeroPage_X = 0x74;
+        public const byte STZ_Absolute = 0x9C;
+        public const byte STZ_Absolute_X = 0x9E;
+
         // TAX
         public const byte TAX = 0xAA;
 
@@ -265,5 +281,13 @@ namespace NES_Emulator
 
         // TYA
         public const byte TYA = 0x98;
+
+        // TRB
+        public const byte TRB_ZeroPage = 0x14;
+        public const byte TRB_Absolute = 0x1C;
+
+        // TSB
+        public const byte TSB_ZeroPage = 0x04;
+        public const byte TSB_Absolute = 0x0C;
     }
 }
