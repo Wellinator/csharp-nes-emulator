@@ -1,7 +1,8 @@
-using System.Reflection.Emit;
 
 namespace NES_Emulator
 {
+    public delegate void OnUpdateCallBack();
+
 
     public interface iCPU
     {
@@ -12,11 +13,11 @@ namespace NES_Emulator
         public byte stack_pointer { get; set; }
         public ushort program_counter { get; set; }
         public CPUInstructionTable instruction_table { get; set; }
-        public void run();
+        public void run(OnUpdateCallBack? callback);
         public byte setStatus(in byte Status);
         public void reset();
         public void load(byte[] Program);
-        public void loadAndRun(byte[] Program);
+        public void loadAndRun(byte[] Program, OnUpdateCallBack callback);
 
     }
 
@@ -64,18 +65,33 @@ namespace NES_Emulator
         private const byte STACK_RESET = 0xFD;
         private const ushort PC_AT_POWER = 0xFFFC;
 
-        public void run()
+        public void run(OnUpdateCallBack? callback = null)
         {
             while (true)
             {
+                if (callback != null) callback();
 
                 byte instruction = _memory.read(program_counter);
+                CPUInstruction opcode = instruction_table.GetInstruction(instruction);
+
                 if (instruction == CPUOpcodes.BRK)
                     return;
-                program_counter++;
 
+                List<string> data = new List<string>();
+
+                if (opcode.bytes > 1)
+                {
+                    for (ushort i = 1; i < opcode.bytes; i++)
+                    {
+                        data.Add(_memory.read((ushort)(program_counter + i)).ToString("X2"));
+                    }
+                }
+
+                Console.WriteLine($"{program_counter:X4}  {opcode.opcode:X2} {String.Join(' ', data.ToArray())} {opcode.mnemonic} ${String.Join("", data.ToArray().Reverse())} A:{register_acc:X2} X:{register_x:X2} Y:{register_y:X2} P:{status:X2} SP:{stack_pointer:X2} CYC: {opcode.cycles}");
+
+                program_counter++;
                 ushort program_counter_state = program_counter;
-                CPUInstruction opcode = instruction_table.GetInstruction(instruction);
+
 
                 switch (instruction)
                 {
@@ -1240,7 +1256,15 @@ namespace NES_Emulator
         public void load(byte[] Program)
         {
             _memory.load(Program);
-            _memory.writeU16(0xFFFC, 0x8000);
+
+            // Default PC start
+            // _memory.writeU16(0xFFFC, 0x8000);
+
+            // Sneak game
+            //_memory.writeU16(0xFFFC, 0x0600);
+
+            // NES Test
+            _memory.writeU16(0xFFFC, 0xC000);
         }
 
         public void branch(bool condition)
@@ -1253,6 +1277,13 @@ namespace NES_Emulator
         }
 
         public void loadAndRun(byte[] Program, OnUpdateCallBack callback)
+        {
+            load(Program);
+            reset();
+            run(callback);
+        }
+
+        public void loadAndRun(byte[] Program)
         {
             load(Program);
             reset();
