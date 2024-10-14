@@ -17,6 +17,7 @@ namespace NES_Emulator
 
         public CPUInstruction GetInstruction(byte opcode)
         {
+            if (!lookupTable.ContainsKey(opcode)) throw new Exception($"Invalid opcode: 0x{opcode:X2}");
             return lookupTable[opcode];
         }
 
