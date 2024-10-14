@@ -60,8 +60,9 @@ namespace NES_Emulator
         public iMemory _memory { get; set; }
         public CPUInstructionTable instruction_table { get; set; }
 
-        private ushort STACK_START_ADDR = 0x0100;
-        private byte STACK_RESET = 0xFD;
+        private const ushort STACK_START_ADDR = 0x0100;
+        private const byte STACK_RESET = 0xFD;
+        private const ushort PC_AT_POWER = 0xFFFC;
 
         public void run()
         {
