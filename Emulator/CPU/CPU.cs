@@ -26,12 +26,27 @@ namespace NES_Emulator
 
         public CPU(iMemory Memory)
         {
-            register_acc = 0;
-            register_x = 0;
-            status = 0;
-            program_counter = 0;
+
+            /*
+            Initial CPU Register Values
+            Register	At Power	        After Reset
+            A, X, Y	    0	                unchanged
+            PC	        ($FFFC)	            ($FFFC)
+            S[1]	    $00 - 3 = $FD	    S -= 3
+            C	        0	                unchanged
+            Z	        0	                unchanged
+            I	        1	                1
+            D	        0	                unchanged
+            V	        0	                unchanged
+            N	        0	                unchanged
+            */
 
             _memory = Memory;
+
+            register_acc = 0;
+            register_x = 0;
+            status = CPUStatus.Initial;
+            program_counter = PC_AT_POWER;
             instruction_table = new CPUInstructionTable();
             stack_pointer = STACK_RESET;
         }
