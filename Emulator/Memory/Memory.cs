@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using NES_Emulator;
 
 public interface iMemory
 {
@@ -24,14 +25,23 @@ public class Memory : iMemory
 {
     public Memory()
     {
-        _memory = new byte[0xFFFF];
+        _memory = new byte[0x10000];
     }
 
     public byte[] _memory { get; set; }
 
     public void load(byte[] Program)
     {
-        Array.Copy(Program, 0, _memory, 0x8000, Program.Length);
+        // Default start 0x8000 - 0xBFFF
+        const int ROM_HEADER_LENGTH = 0x0010;
+        // Array.Copy(Program, ROM_HEADER_LENGTH, _memory, 0x8000, Program.Length);
+
+        // Custom for Sneak game test
+        //Array.Copy(Program, 0, _memory, 0x0600, Program.Length);
+
+        // Custom NESTest program
+        Array.Copy(Program, ROM_HEADER_LENGTH, _memory, 0x8000, 0x4000 - ROM_HEADER_LENGTH);
+        Array.Copy(Program, ROM_HEADER_LENGTH, _memory, 0xC000, 0x4000 - ROM_HEADER_LENGTH);
     }
 
     public byte read(ushort Address)
