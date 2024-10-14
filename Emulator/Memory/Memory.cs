@@ -15,6 +15,7 @@ public interface iMemory
     public byte read(ushort Address);
     public void write(ushort Address, byte Data);
     public ushort readU16(ushort Address);
+    public ushort readU16(ref ushort Address);
     public void writeU16(ushort Address, ushort Data);
     public void load(byte[] Program);
 }
@@ -43,6 +44,16 @@ public class Memory : iMemory
     {
         var lo = read(Address);
         var hi = read((ushort)(Address + 1));
+        return (ushort)((hi << 8) | (lo));
+    }
+
+    public ushort readU16(ref ushort Address)
+    {
+        var lo = read(Address);
+        Address++;
+        var hi = read(Address);
+        Address++;
+
         return (ushort)((hi << 8) | (lo));
     }
 
