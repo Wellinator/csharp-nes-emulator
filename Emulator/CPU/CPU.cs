@@ -185,8 +185,45 @@ namespace NES_Emulator
                         BPL();
                         break;
 
+                    case CPUOpcodes.BRA_Relative:
+                    case CPUOpcodes.BRA_Relative_Word:
+                        BRA();
+                        break;
+
                     case CPUOpcodes.BVC:
                         BVC();
+                        break;
+
+                    case CPUOpcodes.BBS7:
+                        BBS7();
+                        break;
+
+                    case CPUOpcodes.BBS6:
+                        BBS6();
+                        break;
+
+                    case CPUOpcodes.BBS5:
+                        BBS5();
+                        break;
+
+                    case CPUOpcodes.BBS4:
+                        BBS4();
+                        break;
+
+                    case CPUOpcodes.BBS3:
+                        BBS3();
+                        break;
+
+                    case CPUOpcodes.BBS2:
+                        BBS2();
+                        break;
+
+                    case CPUOpcodes.BBS1:
+                        BBS1();
+                        break;
+
+                    case CPUOpcodes.BBS0:
+                        BBS0();
                         break;
 
                     case CPUOpcodes.BVS:
@@ -236,6 +273,9 @@ namespace NES_Emulator
                         break;
 
                     // DEC
+                    case CPUOpcodes.DEC_Accumulator:
+                        DEC();
+                        break;
                     case CPUOpcodes.DEC_ZeroPage:
                     case CPUOpcodes.DEC_ZeroPage_X:
                     case CPUOpcodes.DEC_Absolute:
@@ -353,12 +393,28 @@ namespace NES_Emulator
                         PHA();
                         break;
 
+                    case CPUOpcodes.PHY:
+                        PHY();
+                        break;
+
+                    case CPUOpcodes.PHX:
+                        PHX();
+                        break;
+
                     case CPUOpcodes.PHP:
                         PHP();
                         break;
 
                     case CPUOpcodes.PLA:
                         PLA();
+                        break;
+
+                    case CPUOpcodes.PLY:
+                        PLY();
+                        break;
+
+                    case CPUOpcodes.PLX:
+                        PLX();
                         break;
 
                     case CPUOpcodes.PLP:
@@ -618,12 +674,58 @@ namespace NES_Emulator
             branch((status & CPUStatus.Negative) == 0);
         }
 
+        private void BRA()
+        {
+            branchByWord(true);
+        }
+
         private void BRK()
         {
             stackPush(status);
             pushUshortToStack(program_counter);
             setBreakFlag();
         }
+
+        private void BBS7()
+        {
+            branch(((status >> 7) & 0x01) == 0x01);
+        }
+
+        private void BBS6()
+        {
+            branch(((status >> 6) & 0x01) == 0x01);
+        }
+
+        private void BBS5()
+        {
+            branch(((status >> 5) & 0x01) == 0x01);
+        }
+
+        private void BBS4()
+        {
+            branch(((status >> 4) & 0x01) == 0x01);
+        }
+
+        private void BBS3()
+        {
+            branch(((status >> 3) & 0x01) == 0x01);
+        }
+
+        private void BBS2()
+        {
+            branch(((status >> 2) & 0x01) == 0x01);
+        }
+
+        private void BBS1()
+        {
+            branch(((status >> 1) & 0x01) == 0x01);
+        }
+
+        private void BBS0()
+        {
+            branch((status & 0x01) == 0x01);
+        }
+
 
         private void BVC()
         {
@@ -686,6 +788,12 @@ namespace NES_Emulator
             }
 
             updateZeroAndNegativeFlags(result);
+        }
+
+        private void DEC()
+        {
+            byte decValue = (byte)(register_acc - 1);
+            setRegisterAcc(decValue);
         }
 
         private void DEC(CPUAddressingMode mode)
@@ -936,6 +1044,16 @@ namespace NES_Emulator
             stackPush(register_acc);
         }
 
+        private void PHY()
+        {
+            stackPush(register_y);
+        }
+
+        private void PHX()
+        {
+            stackPush(register_x);
+        }
+
         private void PHP()
         {
             stackPush((byte)(status | CPUStatus.Break));
@@ -944,6 +1062,18 @@ namespace NES_Emulator
         private void PLA()
         {
             setRegisterAcc(stackPop());
+        }
+
+        private void PLY()
+        {
+            register_y = stackPop();
+            updateZeroAndNegativeFlags(register_y);
+        }
+
+        private void PLX()
+        {
+            register_x = stackPop();
+            updateZeroAndNegativeFlags(register_x);
         }
 
         private void PLP()
@@ -1285,6 +1415,18 @@ namespace NES_Emulator
             {
                 sbyte displacement = (sbyte)_memory.read(program_counter);
                 program_counter = (ushort)(program_counter + displacement + 1);
+            }
+        }
+
+        public void branchByWord(bool condition)
+        {
+            if (condition)
+            {
+                var low = _memory.read(program_counter);
+                var high = _memory.read((ushort)(program_counter + 1));
+
+                ushort displacement = (ushort)((high << 8) | (low));
+                program_counter = (ushort)(program_counter + displacement + 2);
             }
         }
 

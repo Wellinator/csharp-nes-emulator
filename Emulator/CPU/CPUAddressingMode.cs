@@ -16,6 +16,7 @@ namespace NES_Emulator
         Absolute_Indirect,
         Indirect,
         Relative,
+        Relative_Word,
         NoneAddressing
     }
 }

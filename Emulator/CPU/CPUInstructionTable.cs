@@ -52,6 +52,17 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.ASL_Absolute, new CPUInstruction { opcode = CPUOpcodes.ASL_Absolute, mnemonic = "ASL", bytes = 3, cycles = 6, mode = CPUAddressingMode.Absolute });
             lookupTable.Add(CPUOpcodes.ASL_Absolute_X, new CPUInstruction { opcode = CPUOpcodes.ASL_Absolute_X, mnemonic = "ASL", bytes = 3, cycles = 7, mode = CPUAddressingMode.Absolute_X });
 
+            // BBS* - Branch on Bit * Set
+            lookupTable.Add(CPUOpcodes.BBS7, new CPUInstruction { opcode = CPUOpcodes.BBS7, mnemonic = "BBS7", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.BBS6, new CPUInstruction { opcode = CPUOpcodes.BBS6, mnemonic = "BBS6", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.BBS5, new CPUInstruction { opcode = CPUOpcodes.BBS5, mnemonic = "BBS5", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.BBS4, new CPUInstruction { opcode = CPUOpcodes.BBS4, mnemonic = "BBS4", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.BBS3, new CPUInstruction { opcode = CPUOpcodes.BBS3, mnemonic = "BBS3", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.BBS2, new CPUInstruction { opcode = CPUOpcodes.BBS2, mnemonic = "BBS2", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.BBS1, new CPUInstruction { opcode = CPUOpcodes.BBS1, mnemonic = "BBS1", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.BBS0, new CPUInstruction { opcode = CPUOpcodes.BBS0, mnemonic = "BBS0", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+
+
             // BCC - Branch if Carry Clear
             lookupTable.Add(CPUOpcodes.BCC_Relative, new CPUInstruction { opcode = CPUOpcodes.BCC_Relative, mnemonic = "BCC", bytes = 2, cycles = 2 /*(+1 if branch succeeds +2 if to a new page)*/, mode = CPUAddressingMode.Relative });
 
@@ -76,6 +87,10 @@ namespace NES_Emulator
 
             // BPL - Branch if Positive
             lookupTable.Add(CPUOpcodes.BPL_Relative, new CPUInstruction { opcode = CPUOpcodes.BPL_Relative, mnemonic = "BPL", bytes = 2, cycles = 2 /*(+1 if branch succeeds +2 if to a new page)*/, mode = CPUAddressingMode.Relative });
+
+            // BRA - Branch Always
+            lookupTable.Add(CPUOpcodes.BRA_Relative, new CPUInstruction { opcode = CPUOpcodes.BRA_Relative, mnemonic = "BRA", bytes = 2, cycles = 2, mode = CPUAddressingMode.Relative });
+            lookupTable.Add(CPUOpcodes.BRA_Relative_Word, new CPUInstruction { opcode = CPUOpcodes.BRA_Relative_Word, mnemonic = "BRA", bytes = 3, cycles = 3, mode = CPUAddressingMode.Relative_Word });
 
             // BRK - Force Interrupt
             lookupTable.Add(CPUOpcodes.BRK, new CPUInstruction { opcode = CPUOpcodes.BRK, mnemonic = "BRK", bytes = 1, cycles = 1 });
@@ -119,6 +134,7 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.CPY_Absolute, new CPUInstruction { opcode = CPUOpcodes.CPY_Absolute, mnemonic = "CPY", bytes = 3, cycles = 4, mode = CPUAddressingMode.Absolute });
 
             // DEC - Decrement Memory
+            lookupTable.Add(CPUOpcodes.DEC_Accumulator, new CPUInstruction { opcode = CPUOpcodes.DEC_Accumulator, mnemonic = "DEC", bytes = 1, cycles = 1, mode = CPUAddressingMode.Accumulator });
             lookupTable.Add(CPUOpcodes.DEC_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.DEC_ZeroPage, mnemonic = "DEC", bytes = 2, cycles = 5, mode = CPUAddressingMode.ZeroPage });
             lookupTable.Add(CPUOpcodes.DEC_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.DEC_ZeroPage_X, mnemonic = "DEC", bytes = 2, cycles = 6, mode = CPUAddressingMode.ZeroPage_X });
             lookupTable.Add(CPUOpcodes.DEC_Absolute, new CPUInstruction { opcode = CPUOpcodes.DEC_Absolute, mnemonic = "DEC", bytes = 3, cycles = 6, mode = CPUAddressingMode.Absolute });
@@ -212,11 +228,23 @@ namespace NES_Emulator
             // PHA - Push Accumulator
             lookupTable.Add(CPUOpcodes.PHA, new CPUInstruction { opcode = CPUOpcodes.PHA, mnemonic = "PHA", bytes = 1, cycles = 3 });
 
+            // PHY - Push Index Register Y On Stack
+            lookupTable.Add(CPUOpcodes.PHY, new CPUInstruction { opcode = CPUOpcodes.PHY, mnemonic = "PHY", bytes = 1, cycles = 1 });
+
+            // PHX - Push Index Register X On Stack
+            lookupTable.Add(CPUOpcodes.PHX, new CPUInstruction { opcode = CPUOpcodes.PHX, mnemonic = "PHX", bytes = 1, cycles = 1 });
+
             // PHP - Push Processor Status
             lookupTable.Add(CPUOpcodes.PHP, new CPUInstruction { opcode = CPUOpcodes.PHP, mnemonic = "PHP", bytes = 1, cycles = 3 });
 
             // PLA - Pull Accumulator
             lookupTable.Add(CPUOpcodes.PLA, new CPUInstruction { opcode = CPUOpcodes.PLA, mnemonic = "PLA", bytes = 1, cycles = 4 });
+
+            // PLY - Pull Index Register Y From Stack
+            lookupTable.Add(CPUOpcodes.PLY, new CPUInstruction { opcode = CPUOpcodes.PLY, mnemonic = "PLY", bytes = 1, cycles = 1 });
+
+            // PLX - Pull Index Register X From Stack
+            lookupTable.Add(CPUOpcodes.PLX, new CPUInstruction { opcode = CPUOpcodes.PLX, mnemonic = "PLX", bytes = 1, cycles = 1 });
 
             // PLP - Pull Processor Status
             lookupTable.Add(CPUOpcodes.PLP, new CPUInstruction { opcode = CPUOpcodes.PLP, mnemonic = "PLP", bytes = 1, cycles = 4 });
