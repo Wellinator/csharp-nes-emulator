@@ -565,9 +565,7 @@ namespace NES_Emulator
 
         private void AND(CPUAddressingMode mode)
         {
-            ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
-
+            byte value = getValueByAddressingMode(mode);
             byte result = (byte)(value & register_acc);
             setRegisterAcc(result);
         }
@@ -575,7 +573,7 @@ namespace NES_Emulator
         private void ASL()
         {
             byte value = register_acc;
-            
+
             bool is7thBitSet = (value >> 7) == 1;
             if (is7thBitSet)
             {
@@ -926,7 +924,7 @@ namespace NES_Emulator
         {
             byte old_value = register_acc;
 
-            if((old_value & CPUStatus.Carry) == 1)
+            if ((old_value & CPUStatus.Carry) == 1)
             {
                 setStatus(CPUStatus.Carry);
             }
@@ -1272,7 +1270,7 @@ namespace NES_Emulator
                 removeStatus(CPUStatus.Carry);
             }
 
-            if(overflow)
+            if (overflow)
             {
                 setStatus(CPUStatus.Overflow);
             }
@@ -1339,6 +1337,30 @@ namespace NES_Emulator
                     ushort deref_base = (ushort)(hi << 8 | lo);
                     ushort deref = (ushort)(deref_base + register_y);
                     return deref;
+
+                default:
+                    throw new Exception($"Invalid addressing mode: {mode}!");
+            }
+        }
+
+        private byte getValueByAddressingMode(CPUAddressingMode mode)
+        {
+            switch (mode)
+            {
+                case CPUAddressingMode.Immediate:
+                    return _memory.read(program_counter);
+
+                case CPUAddressingMode.Relative:
+                case CPUAddressingMode.ZeroPage:
+                case CPUAddressingMode.Absolute:
+                case CPUAddressingMode.ZeroPage_X:
+                case CPUAddressingMode.ZeroPage_Y:
+                case CPUAddressingMode.Absolute_X:
+                case CPUAddressingMode.Absolute_Y:
+                case CPUAddressingMode.Indirect_X:
+                case CPUAddressingMode.Indirect_Y:
+                    var addr = getAddressByMode(mode);
+                    return _memory.read(addr);
 
                 default:
                     throw new Exception($"Invalid addressing mode: {mode}!");
