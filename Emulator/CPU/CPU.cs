@@ -1327,8 +1327,9 @@ namespace NES_Emulator
                     addr_base = _memory.read(program_counter);
                     ptr = (byte)(addr_base + register_x);
                     lo = _memory.read(ptr);
-                    hi = _memory.read((ushort)((addr_base + 1)));
-                    return (ushort)(hi << 8 | lo);
+                    hi = _memory.read((byte)(ptr + 1));
+                    addr = (ushort)(hi << 8 | lo);
+                    return addr;
 
                 case CPUAddressingMode.Indirect_Y:
                     addr_base = _memory.read(program_counter);
