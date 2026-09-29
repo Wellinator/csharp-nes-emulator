@@ -79,7 +79,10 @@ namespace NES_Emulator
                 int _cycle = opcode.cycles;
 
                 if (instruction == CPUOpcodes.BRK)
+                {
+                    BRK();
                     return;
+                }
 
                 List<string> data = new List<string>();
 
