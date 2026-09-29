@@ -304,7 +304,7 @@ namespace NES_Emulator
 
             // STY - Store Y Register
             lookupTable.Add(CPUOpcodes.STY_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.STY_ZeroPage, mnemonic = "STY", bytes = 2, cycles = 3, mode = CPUAddressingMode.ZeroPage });
-            lookupTable.Add(CPUOpcodes.STY_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.STY_ZeroPage_X, mnemonic = "STY", bytes = 2, cycles = 4, mode = CPUAddressingMode.ZeroPage_Y });
+            lookupTable.Add(CPUOpcodes.STY_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.STY_ZeroPage_X, mnemonic = "STY", bytes = 2, cycles = 4, mode = CPUAddressingMode.ZeroPage_X });
             lookupTable.Add(CPUOpcodes.STY_Absolute, new CPUInstruction { opcode = CPUOpcodes.STY_Absolute, mnemonic = "STY", bytes = 3, cycles = 4, mode = CPUAddressingMode.Absolute });
 
             // STZ - Store Accumulator
