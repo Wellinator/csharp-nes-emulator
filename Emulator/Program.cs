@@ -1,30 +1,46 @@
 ﻿// using NES_Emulator;
 
 using SDL2;
-using System;
 using NES_Emulator;
+using static SDL2.SDL;
 
 public class Program
 {
+    static public byte[] Rom { get; set; } = new byte[0x4000];
+    public static Emulator emu = new Emulator();
     public static bool running = true;
-
     public static IntPtr renderer;
     public static IntPtr window;
 
     static void Main(string[] args)
     {
+        Console.WriteLine("Args:", args.Length);
         // Initilizes SDL.
         Setup();
 
-        Emulator emu = new Emulator(640, 480, "NES Emulator");
-        emu.Run();
+        // Open rom file;
+        string path = @"D:\CSharp\NES Test Roms\nestest.nes";
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("ROM file could not be loaded!");
+        }
 
-        // Main loop for the program
-        while (running)
+        using (
+            FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read)
+        )
+        {
+            using (BinaryReader binReader = new BinaryReader(fileStream))
+            {
+                byte[] fileBytes = binReader.ReadBytes((int)fileStream.Length);
+                Array.Copy(fileBytes, 0, Rom, 0, 0x4000);
+            }
+        }
+
+        emu.Run(Rom, () =>
         {
             PollEvents();
             Render();
-        }
+        });
 
         // Clean up the resources that were created.
         CleanUp();
@@ -46,7 +62,7 @@ public class Program
             "NES Emulator in C#",
             SDL.SDL_WINDOWPOS_UNDEFINED,
             SDL.SDL_WINDOWPOS_UNDEFINED,
-            640,
+            480,
             480,
             SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
 
@@ -59,8 +75,7 @@ public class Program
         renderer = SDL.SDL_CreateRenderer(
             window,
             -1,
-            SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED |
-            SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
+            SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
 
         if (renderer == IntPtr.Zero)
         {
@@ -73,15 +88,16 @@ public class Program
     /// </summary>
     static void PollEvents()
     {
+
         // Check to see if there are any events and continue to do so until the queue is empty.
         while (SDL.SDL_PollEvent(out SDL.SDL_Event e) == 1)
         {
-            switch (e.type)
+            if (SDL.SDL_EventType.SDL_QUIT == e.type || e.key.keysym.sym == SDL_Keycode.SDLK_ESCAPE)
             {
-                case SDL.SDL_EventType.SDL_QUIT:
-                    running = false;
-                    break;
+                running = false;
+                break;
             }
+
         }
     }
 
