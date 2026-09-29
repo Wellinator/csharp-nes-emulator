@@ -938,7 +938,7 @@ namespace NES_Emulator
 
         private void PHP()
         {
-            stackPush(status);
+            stackPush((byte)(status | CPUStatus.Break));
         }
 
         private void PLA()
@@ -948,7 +948,7 @@ namespace NES_Emulator
 
         private void PLP()
         {
-            status = stackPop();
+            status = (byte)((stackPop() & ~CPUStatus.Break) | CPUStatus.Reserved);
         }
 
         private void ROL()
@@ -998,7 +998,7 @@ namespace NES_Emulator
 
         private void RTI()
         {
-            status = stackPop();
+            status = (byte)(stackPop() | CPUStatus.Reserved); ;
             program_counter = popUshortFromStack();
         }
 
