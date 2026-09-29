@@ -74,7 +74,10 @@ namespace NES_Emulator
             {
                 if (callback != null) callback();
 
+                ushort pc_for_log = program_counter;
                 byte instruction = _memory.read(program_counter);
+                program_counter++;
+
                 CPUInstruction opcode = instruction_table.GetInstruction(instruction);
                 int _cycle = opcode.cycles;
 
@@ -84,26 +87,22 @@ namespace NES_Emulator
                     return;
                 }
 
+                // DEBUG LOG CONTENT INIT
                 List<string> data = new List<string>();
-
                 if (opcode.bytes > 1)
                 {
                     for (ushort i = 1; i < opcode.bytes; i++)
                     {
-                        data.Add(_memory.read((ushort)(program_counter + i)).ToString("X2"));
+                        data.Add(_memory.read((ushort)(pc_for_log + i)).ToString("X2"));
                     }
                 }
-
                 var opcodePlusData = $"{opcode.opcode:X2} {String.Join(' ', data.ToArray())}".PadRight(10);
                 var mnemonicPlusAddr = $"{opcode.mnemonic} ${String.Join("", data.ToArray().Reverse())}".PadRight(32);
+                // DEBUG LOG CONTENT END
 
                 cycles += opcode.cycles;
 
-                Console.WriteLine($"{program_counter:X4}  {opcodePlusData} {mnemonicPlusAddr} A:{register_acc:X2} X:{register_x:X2} Y:{register_y:X2} P:{status:X2} SP:{stack_pointer:X2} CYC: {cycles}");
-
-                program_counter++;
-                ushort program_counter_state = program_counter;
-
+                Console.WriteLine($"{pc_for_log:X4}  {opcodePlusData} {mnemonicPlusAddr} A:{register_acc:X2} X:{register_x:X2} Y:{register_y:X2} P:{status:X2} SP:{stack_pointer:X2} CYC: {cycles}");
 
                 switch (instruction)
                 {
@@ -547,12 +546,6 @@ namespace NES_Emulator
                     default:
                         throw new Exception($"Invalid instruction: {opcode.opcode:X2}({opcode.mnemonic})!");
                 }
-
-                if (program_counter_state == program_counter)
-                {
-                    program_counter += (ushort)(opcode.bytes - 1);
-                }
-
             }
         }
 
@@ -851,28 +844,8 @@ namespace NES_Emulator
 
         private void JMP(CPUAddressingMode mode)
         {
-
-
-            if (mode == CPUAddressingMode.Absolute)
-            {
-                ushort addr = getAddressByMode(mode);
-                program_counter = addr;
-            }
-            else
-            {
-                ushort addr = _memory.readU16(program_counter);
-
-                if ((addr & 0x00FF) == 0x00FF)
-                {
-                    byte lo = _memory.read(addr);
-                    byte hi = _memory.read((ushort)(addr & 0xFF00));
-                    program_counter = (ushort)((hi << 8) | lo);
-                }
-                else
-                {
-                    program_counter = _memory.readU16(addr);
-                };
-            }
+            ushort addr = getAddressByMode(mode);
+            program_counter = addr;
         }
 
         /// <summary>
@@ -1295,36 +1268,65 @@ namespace NES_Emulator
 
                 case CPUAddressingMode.Immediate:
                 case CPUAddressingMode.Relative:
-                    return program_counter;
+                    addr = program_counter;
+                    program_counter++;
+                    return addr;
 
                 case CPUAddressingMode.ZeroPage:
-                    return _memory.read(program_counter);
-
-                case CPUAddressingMode.Absolute:
-                    return _memory.readU16(program_counter);
+                    addr = _memory.read(program_counter);
+                    program_counter++;
+                    return addr;
 
                 case CPUAddressingMode.ZeroPage_X:
                     pos = _memory.read(program_counter);
+                    program_counter++;
                     addr = (byte)(pos + register_x);
                     return addr;
 
                 case CPUAddressingMode.ZeroPage_Y:
                     pos = _memory.read(program_counter);
+                    program_counter++;
                     addr = (byte)(pos + register_y);
+                    return addr;
+
+                case CPUAddressingMode.Absolute:
+                    addr = _memory.readU16(program_counter);
+                    program_counter += 2;
                     return addr;
 
                 case CPUAddressingMode.Absolute_X:
                     addr_base = _memory.readU16(program_counter);
+                    program_counter += 2;
                     addr = (ushort)(addr_base + register_x);
                     return addr;
 
                 case CPUAddressingMode.Absolute_Y:
                     addr_base = _memory.readU16(program_counter);
+                    program_counter += 2;
                     addr = (ushort)(addr_base + register_y);
+                    return addr;
+
+                case CPUAddressingMode.Indirect:
+                    addr_base = _memory.readU16(program_counter);
+                    program_counter += 2;
+
+                    // 6502 bug: if the low byte of the address is 0xFF, the high byte is fetched from the beginning of the page instead of the next page
+                    if ((addr_base & 0x00FF) == 0x00FF)
+                    {
+                        lo = _memory.read(addr_base);
+                        hi = _memory.read((ushort)(addr_base & 0xFF00));
+                        addr = (ushort)((hi << 8) | lo);
+                    }
+                    else
+                    {
+                        addr = _memory.readU16(addr_base);
+                    }
+
                     return addr;
 
                 case CPUAddressingMode.Indirect_X:
                     addr_base = _memory.read(program_counter);
+                    program_counter++;
                     ptr = (byte)(addr_base + register_x);
                     lo = _memory.read(ptr);
                     hi = _memory.read((byte)(ptr + 1));
@@ -1333,6 +1335,7 @@ namespace NES_Emulator
 
                 case CPUAddressingMode.Indirect_Y:
                     addr_base = _memory.read(program_counter);
+                    program_counter++;
                     lo = _memory.read(addr_base);
                     hi = _memory.read((byte)(addr_base + 1));
                     ushort deref_base = (ushort)((hi << 8) | lo);
@@ -1352,7 +1355,9 @@ namespace NES_Emulator
             switch (mode)
             {
                 case CPUAddressingMode.Immediate:
-                    return _memory.read(program_counter);
+                    byte value = _memory.read(program_counter);
+                    program_counter++;
+                    return value;
 
                 case CPUAddressingMode.Relative:
                 case CPUAddressingMode.ZeroPage:
@@ -1437,10 +1442,12 @@ namespace NES_Emulator
 
         public void branch(bool condition)
         {
+            ushort addr = getAddressByMode(CPUAddressingMode.Relative);
+
             if (condition)
             {
-                sbyte displacement = (sbyte)_memory.read(program_counter);
-                program_counter = (ushort)(program_counter + displacement + 1);
+                sbyte displacement = (sbyte)_memory.read(addr);
+                program_counter = (ushort)(program_counter + displacement);
             }
         }
 
