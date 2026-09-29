@@ -10,7 +10,10 @@ Uso:
     # comparar dois arquivos
     python tools/nestest_compare.py emu.log
 
-    # rodar o emulador e comparar a saída em tempo real (para na 1ª divergência)
+    # sem argumentos: roda Emulator/bin/Debug/net6.0/NES Emulator.exe e compara
+    python tools/nestest_compare.py --no-cycles
+
+    # rodar outro comando/executável e comparar a saída em tempo real
     python tools/nestest_compare.py --run "dotnet run --project Emulator"
 
     # ignorar ciclos enquanto a contagem ainda não está implementada
@@ -29,6 +32,7 @@ from pathlib import Path
 from typing import Iterable, Iterator
 
 DEFAULT_GOLDEN = Path(r"D:\CSharp\NES Test Roms\other\nestest.log")
+DEFAULT_EMULATOR = Path(__file__).resolve().parent.parent / "Emulator" / "bin" / "Debug" / "net6.0" / "NES Emulator.exe"
 
 LINE_RE = re.compile(
     r"^(?P<pc>[0-9A-Fa-f]{4})\s+"
@@ -152,17 +156,26 @@ def print_divergence(exp: State, got: State, errors: list[str], history: deque, 
 
 
 def run_emulator(cmd: str) -> tuple[subprocess.Popen, Iterator[str]]:
+    # Se for o caminho de um executável (mesmo com espaços), roda direto sem shell,
+    # assim não é preciso brigar com aspas no PowerShell.
+    exe = Path(cmd.strip().strip('"').strip("'"))
+    if exe.is_file():
+        cmd, shell = [str(exe)], False
+    else:
+        shell = True
     proc = subprocess.Popen(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        cmd, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         text=True, encoding="utf-8", errors="replace", bufsize=1)
     return proc, iter(proc.stdout.readline, "")
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Compara log do emulador com o nestest.log")
-    src = ap.add_mutually_exclusive_group(required=True)
+    src = ap.add_mutually_exclusive_group()
     src.add_argument("emu_log", nargs="?", help="log gerado pelo emulador ('-' = stdin)")
-    src.add_argument("--run", metavar="CMD", help="comando que roda o emulador e imprime o log no stdout")
+    src.add_argument("--run", metavar="CMD",
+                     help="comando ou executável que roda o emulador e imprime o log no stdout "
+                          f"(padrão, se nenhum log for passado: {DEFAULT_EMULATOR})")
     ap.add_argument("--golden", type=Path, default=DEFAULT_GOLDEN, help=f"log de referência (padrão: {DEFAULT_GOLDEN})")
     ap.add_argument("--no-cycles", action="store_true", help="não compara a contagem de ciclos")
     ap.add_argument("--max-errors", type=int, default=1,
@@ -172,6 +185,12 @@ def main() -> int:
                     help="ignora os bits 4 (B) e 5 (-) do P, que não existem fisicamente no registrador")
     args = ap.parse_args()
     args.p_mask = 0xCF if args.ignore_unused_flags else 0xFF
+
+    if not args.emu_log and not args.run:
+        if not DEFAULT_EMULATOR.is_file():
+            ap.error(f"nenhum log informado e o emulador não foi encontrado em {DEFAULT_EMULATOR} "
+                     "(rode 'dotnet build' ou passe --run / um arquivo de log)")
+        args.run = str(DEFAULT_EMULATOR)
 
     golden = list(parse(args.golden.read_text(encoding="utf-8", errors="replace").splitlines()))
 
