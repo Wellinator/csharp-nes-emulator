@@ -304,14 +304,14 @@ namespace NES_Emulator
 
             // STY - Store Y Register
             lookupTable.Add(CPUOpcodes.STY_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.STY_ZeroPage, mnemonic = "STY", bytes = 2, cycles = 3, mode = CPUAddressingMode.ZeroPage });
-            lookupTable.Add(CPUOpcodes.STY_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.STY_ZeroPage_X, mnemonic = "STY", bytes = 2, cycles = 4, mode = CPUAddressingMode.ZeroPage_X });
+            lookupTable.Add(CPUOpcodes.STY_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.STY_ZeroPage_X, mnemonic = "STY", bytes = 2, cycles = 4, mode = CPUAddressingMode.ZeroPage_Y });
             lookupTable.Add(CPUOpcodes.STY_Absolute, new CPUInstruction { opcode = CPUOpcodes.STY_Absolute, mnemonic = "STY", bytes = 3, cycles = 4, mode = CPUAddressingMode.Absolute });
 
             // STZ - Store Accumulator
-            lookupTable.Add(CPUOpcodes.STZ_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.STZ_ZeroPage, mnemonic = "STZ", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
-            lookupTable.Add(CPUOpcodes.STZ_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.STZ_ZeroPage_X, mnemonic = "STZ", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage_X });
-            lookupTable.Add(CPUOpcodes.STZ_Absolute, new CPUInstruction { opcode = CPUOpcodes.STZ_Absolute, mnemonic = "STZ", bytes = 2, cycles = 2, mode = CPUAddressingMode.Absolute });
-            lookupTable.Add(CPUOpcodes.STZ_Absolute_X, new CPUInstruction { opcode = CPUOpcodes.STZ_Absolute_X, mnemonic = "STZ", bytes = 2, cycles = 2, mode = CPUAddressingMode.Absolute_X });
+            lookupTable.Add(CPUOpcodes.STZ_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.STZ_ZeroPage, mnemonic = "STZ", bytes = 2, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.STZ_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.STZ_ZeroPage_X, mnemonic = "STZ", bytes = 2, cycles = 4, mode = CPUAddressingMode.ZeroPage_X });
+            lookupTable.Add(CPUOpcodes.STZ_Absolute, new CPUInstruction { opcode = CPUOpcodes.STZ_Absolute, mnemonic = "STZ", bytes = 3, cycles = 4, mode = CPUAddressingMode.Absolute });
+            lookupTable.Add(CPUOpcodes.STZ_Absolute_X, new CPUInstruction { opcode = CPUOpcodes.STZ_Absolute_X, mnemonic = "STZ", bytes = 3, cycles = 5, mode = CPUAddressingMode.Absolute_X });
 
             // TAX - Transfer Accumulator to X
             lookupTable.Add(CPUOpcodes.TAX, new CPUInstruction { opcode = CPUOpcodes.TAX, mnemonic = "TAX", bytes = 1, cycles = 2 });
