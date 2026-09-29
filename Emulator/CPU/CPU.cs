@@ -1334,9 +1334,12 @@ namespace NES_Emulator
                 case CPUAddressingMode.Indirect_Y:
                     addr_base = _memory.read(program_counter);
                     lo = _memory.read(addr_base);
-                    hi = _memory.read((ushort)(addr_base + 1));
-                    ushort deref_base = (ushort)(hi << 8 | lo);
+                    hi = _memory.read((byte)(addr_base + 1));
+                    ushort deref_base = (ushort)((hi << 8) | lo);
+
+                    // TODO: check if the deref address has a page break, if so, add 1 cycle to the  CPU instruction 
                     ushort deref = (ushort)(deref_base + register_y);
+
                     return deref;
 
                 default:
