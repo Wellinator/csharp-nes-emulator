@@ -1305,7 +1305,7 @@ namespace NES_Emulator
 
                 case CPUAddressingMode.ZeroPage_X:
                     pos = _memory.read(program_counter);
-                    addr = (ushort)((pos + register_x));
+                    addr = (byte)(pos + register_x);
                     return addr;
 
                 case CPUAddressingMode.ZeroPage_Y:
