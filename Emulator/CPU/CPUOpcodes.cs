@@ -63,7 +63,12 @@ namespace NES_Emulator
 
         // BRA - Branch Always
         public const byte BRA_Relative = 0x80;
-        public const byte BRA_Relative_Word = 0x83;
+
+        // SAX
+        public const byte SAX_Indirect_X = 0x83;
+        public const byte SAX_ZeroPage = 0x87;
+        public const byte SAX_Absolute = 0x8F;
+        public const byte SAX_ZeroPage_Y = 0x97;
 
         // BRK
         public const byte BRK = 0x00;

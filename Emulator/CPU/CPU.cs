@@ -184,8 +184,11 @@ namespace NES_Emulator
                     case CPUOpcodes.BRA_Relative:
                         NOP(opcode.mode);
                         break;
-                    case CPUOpcodes.BRA_Relative_Word:
-                        BRA();
+                    case CPUOpcodes.SAX_Indirect_X:
+                    case CPUOpcodes.SAX_ZeroPage:
+                    case CPUOpcodes.SAX_Absolute:
+                    case CPUOpcodes.SAX_ZeroPage_Y:
+                        SAX(opcode.mode);
                         break;
 
                     case CPUOpcodes.BVC:
@@ -669,9 +672,11 @@ namespace NES_Emulator
             branch((status & CPUStatus.Negative) == 0);
         }
 
-        private void BRA()
+        private void SAX(CPUAddressingMode mode)
         {
-            branchByWord(true);
+            ushort value = (ushort)(register_acc & register_x);
+            ushort addr = getAddressByMode(mode);
+            _memory.write(addr, (byte)value);
         }
 
         private void BRK()

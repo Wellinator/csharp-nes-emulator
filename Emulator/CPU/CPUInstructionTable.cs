@@ -80,7 +80,12 @@ namespace NES_Emulator
 
             // BRA - Branch Always
             lookupTable.Add(CPUOpcodes.BRA_Relative, new CPUInstruction { opcode = CPUOpcodes.BRA_Relative, mnemonic = "BRA", bytes = 2, cycles = 2, mode = CPUAddressingMode.Immediate });
-            lookupTable.Add(CPUOpcodes.BRA_Relative_Word, new CPUInstruction { opcode = CPUOpcodes.BRA_Relative_Word, mnemonic = "BRA", bytes = 3, cycles = 3, mode = CPUAddressingMode.Relative_Word });
+
+            // SAX - Store A & X Register (Unofficial Opcode)
+            lookupTable.Add(CPUOpcodes.SAX_Indirect_X, new CPUInstruction { opcode = CPUOpcodes.SAX_Indirect_X, mnemonic = "SAX", bytes = 2, cycles = 6, mode = CPUAddressingMode.Indirect_X });
+            lookupTable.Add(CPUOpcodes.SAX_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.SAX_ZeroPage, mnemonic = "SAX", bytes = 2, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.SAX_Absolute, new CPUInstruction { opcode = CPUOpcodes.SAX_Absolute, mnemonic = "SAX", bytes = 3, cycles = 4, mode = CPUAddressingMode.Absolute });
+            lookupTable.Add(CPUOpcodes.SAX_ZeroPage_Y, new CPUInstruction { opcode = CPUOpcodes.SAX_ZeroPage_Y, mnemonic = "SAX", bytes = 2, cycles = 4, mode = CPUAddressingMode.ZeroPage_Y });
 
             // BRK - Force Interrupt
             lookupTable.Add(CPUOpcodes.BRK, new CPUInstruction { opcode = CPUOpcodes.BRK, mnemonic = "BRK", bytes = 1, cycles = 1 });
@@ -92,7 +97,7 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.BVS, new CPUInstruction { opcode = CPUOpcodes.BVS, mnemonic = "BVS", bytes = 2, cycles = 2 /*(+1 if branch succeeds +2 if to a new page)*/, mode = CPUAddressingMode.Relative });
 
             // CLC - Clear Carry Flag
-            lookupTable.Add(CPUOpcodes.CLC, new CPUInstruction { opcode = CPUOpcodes.CLC, mnemonic = "CLC", bytes = 1, cycles = 2 });
+            lookupTable.Add(CPUOpcodes.CLC, new CPUInstruction { opcode = CPUOpcodes.CLC, mnemonic = "CLC", bytes = 1, cycles = 2, mode = CPUAddressingMode.Implied });
 
             // CLD - Clear Decimal Mode
             lookupTable.Add(CPUOpcodes.CLD, new CPUInstruction { opcode = CPUOpcodes.CLD, mnemonic = "CLD", bytes = 1, cycles = 2 });
