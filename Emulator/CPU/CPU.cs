@@ -144,12 +144,9 @@ namespace NES_Emulator
 
                     // ASR
                     case CPUOpcodes.ASR_Accumulator:
-                        ASR();
-                        break;
-
                     case CPUOpcodes.ASR_ZeroPage:
                     case CPUOpcodes.ASR_ZeroPage_X:
-                        ASR(opcode.mode);
+                        ASR();
                         break;
 
                     case CPUOpcodes.BCC_Relative:
@@ -185,6 +182,8 @@ namespace NES_Emulator
                         break;
 
                     case CPUOpcodes.BRA_Relative:
+                        NOP(opcode.mode);
+                        break;
                     case CPUOpcodes.BRA_Relative_Word:
                         BRA();
                         break;
@@ -273,7 +272,7 @@ namespace NES_Emulator
 
                     // DEC
                     case CPUOpcodes.DEC_Accumulator:
-                        DEC();
+                        NOP(opcode.mode);
                         break;
                     case CPUOpcodes.DEC_ZeroPage:
                     case CPUOpcodes.DEC_ZeroPage_X:
@@ -304,7 +303,7 @@ namespace NES_Emulator
 
                     // INC
                     case CPUOpcodes.INC_Accumulator:
-                        INC();
+                        NOP(opcode.mode);
                         break;
                     case CPUOpcodes.INC_ZeroPage:
                     case CPUOpcodes.INC_ZeroPage_X:
@@ -376,6 +375,15 @@ namespace NES_Emulator
                     case CPUOpcodes.NOP:
                         break;
 
+                    case CPUOpcodes.NOP_Unofficial_F4:
+                    case CPUOpcodes.NOP_Unofficial_D4:
+                    case CPUOpcodes.NOP_Unofficial_5C:
+                    case CPUOpcodes.NOP_Unofficial_7C:
+                    case CPUOpcodes.NOP_Unofficial_DC:
+                    case CPUOpcodes.NOP_Unofficial_FC:
+                        NOP(opcode.mode);
+                        break;
+
                     // ORA
                     case CPUOpcodes.ORA_Immediate:
                     case CPUOpcodes.ORA_ZeroPage:
@@ -393,11 +401,11 @@ namespace NES_Emulator
                         break;
 
                     case CPUOpcodes.PHY:
-                        PHY();
+                        NOP(opcode.mode);
                         break;
 
                     case CPUOpcodes.PHX:
-                        PHX();
+                        NOP(opcode.mode);
                         break;
 
                     case CPUOpcodes.PHP:
@@ -409,11 +417,11 @@ namespace NES_Emulator
                         break;
 
                     case CPUOpcodes.PLY:
-                        PLY();
+                        NOP(opcode.mode);
                         break;
 
                     case CPUOpcodes.PLX:
-                        PLX();
+                        NOP(opcode.mode);
                         break;
 
                     case CPUOpcodes.PLP:
@@ -502,8 +510,11 @@ namespace NES_Emulator
                         break;
 
                     // STZ
-                    case CPUOpcodes.STZ_ZeroPage:
                     case CPUOpcodes.STZ_ZeroPage_X:
+                        NOP(opcode.mode);
+                        break;
+
+                    case CPUOpcodes.STZ_ZeroPage:
                     case CPUOpcodes.STZ_Absolute:
                     case CPUOpcodes.STZ_Absolute_X:
                         STZ(opcode.mode);
@@ -534,8 +545,10 @@ namespace NES_Emulator
                         break;
 
                     case CPUOpcodes.TRB_ZeroPage:
+                        NOP(opcode.mode);
+                        break;
                     case CPUOpcodes.TRB_Absolute:
-                        TRB(opcode.mode);
+                        NOP(opcode.mode);
                         break;
 
                     case CPUOpcodes.TSB_ZeroPage:
@@ -547,6 +560,13 @@ namespace NES_Emulator
                         throw new Exception($"Invalid instruction: {opcode.opcode:X2}({opcode.mnemonic})!");
                 }
             }
+        }
+
+        private void NOP(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr); // The value is discarded and the CPU state is not affected.
+            return;
         }
 
         private void ADC(CPUAddressingMode mode)
@@ -620,6 +640,12 @@ namespace NES_Emulator
         {
             ushort addr = getAddressByMode(mode);
             byte data = _memory.read(addr);
+
+            if (mode != CPUAddressingMode.ZeroPage && mode != CPUAddressingMode.Absolute)
+            {
+                return; // NOP instruction for other modes
+            }
+
             byte result = (byte)(register_acc & data);
 
             if (result == 0x00)
@@ -816,12 +842,6 @@ namespace NES_Emulator
             updateZeroAndNegativeFlags(register_acc);
         }
 
-        private void INC()
-        {
-            byte incValue = (byte)(register_acc + 1);
-            setRegisterAcc(incValue);
-        }
-
         private void INC(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
@@ -931,76 +951,10 @@ namespace NES_Emulator
 
         private void ASR()
         {
-            byte old_value = register_acc;
-
-            if ((old_value & CPUStatus.Carry) == 1)
-            {
-                setStatus(CPUStatus.Carry);
-            }
-            else
-            {
-                removeStatus(CPUStatus.Carry);
-            }
-
-            register_acc = (byte)(register_acc >> 1);
-
-            if (register_acc == 0)
-            {
-                setStatus(CPUStatus.Zero);
-            }
-            else
-            {
-                removeStatus(CPUStatus.Zero);
-            }
-
-            bool was7thBitSet = (old_value >> 7) == 1;
-            if (was7thBitSet)
-            {
-                setStatus(CPUStatus.Negative);
-            }
-            else
-            {
-                removeStatus(CPUStatus.Negative);
-            }
+            ushort addr = getAddressByMode(CPUAddressingMode.ZeroPage);
+            byte value = _memory.read(addr); // The value is discarded and the CPU state is not affected.
+            return;
         }
-
-        private void ASR(CPUAddressingMode mode)
-        {
-            ushort addr = getAddressByMode(mode);
-            byte old_value = _memory.read(addr);
-
-            if ((old_value & CPUStatus.Carry) == 1)
-            {
-                setStatus(CPUStatus.Carry);
-            }
-            else
-            {
-                removeStatus(CPUStatus.Carry);
-            }
-
-            byte result = (byte)(old_value << 1);
-            _memory.write(addr, result);
-
-            if (result == 0)
-            {
-                setStatus(CPUStatus.Zero);
-            }
-            else
-            {
-                removeStatus(CPUStatus.Zero);
-            }
-
-            bool was7thBitSet = (old_value >> 7) == 1;
-            if (was7thBitSet)
-            {
-                setStatus(CPUStatus.Negative);
-            }
-            else
-            {
-                removeStatus(CPUStatus.Negative);
-            }
-        }
-
 
 
         private void ORA(CPUAddressingMode mode)
@@ -1033,18 +987,6 @@ namespace NES_Emulator
         private void PLA()
         {
             setRegisterAcc(stackPop());
-        }
-
-        private void PLY()
-        {
-            register_y = stackPop();
-            updateZeroAndNegativeFlags(register_y);
-        }
-
-        private void PLX()
-        {
-            register_x = stackPop();
-            updateZeroAndNegativeFlags(register_x);
         }
 
         private void PLP()
@@ -1205,19 +1147,8 @@ namespace NES_Emulator
         private void TSB(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
-
-            byte testResult = (byte)(register_acc | value);
-            _memory.write(addr, testResult);
-
-            if (testResult == 0)
-            {
-                setStatus(CPUStatus.Zero);
-            }
-            else
-            {
-                removeStatus(CPUStatus.Zero);
-            }
+            byte value = _memory.read(addr); // The value is discarded and the CPU state is not affected.
+            return;
         }
 
 
@@ -1265,6 +1196,9 @@ namespace NES_Emulator
 
             switch (mode)
             {
+                case CPUAddressingMode.Implied:
+                    addr = program_counter;
+                    return addr;
 
                 case CPUAddressingMode.Immediate:
                 case CPUAddressingMode.Relative:
@@ -1458,7 +1392,7 @@ namespace NES_Emulator
                 var low = _memory.read(program_counter);
                 var high = _memory.read((ushort)(program_counter + 1));
 
-                ushort displacement = (ushort)((high << 8) | (low));
+                ushort displacement = (ushort)((high << 8) | low);
                 program_counter = (ushort)(program_counter + displacement + 2);
             }
         }

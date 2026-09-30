@@ -200,6 +200,12 @@ namespace NES_Emulator
 
         // NOP
         public const byte NOP = 0xEA;
+        public const byte NOP_Unofficial_F4 = 0xF4;
+        public const byte NOP_Unofficial_D4 = 0xD4;
+        public const byte NOP_Unofficial_5C = 0x5C;
+        public const byte NOP_Unofficial_7C = 0x7C;
+        public const byte NOP_Unofficial_DC = 0xDC;
+        public const byte NOP_Unofficial_FC = 0xFC;
 
         // ORA
         public const byte ORA_Immediate = 0x09;

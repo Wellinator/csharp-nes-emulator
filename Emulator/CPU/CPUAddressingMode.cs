@@ -2,7 +2,7 @@ namespace NES_Emulator
 {
     public enum CPUAddressingMode
     {
-        Impliend,
+        Implied,
         Accumulator,
         Immediate,
         ZeroPage,
