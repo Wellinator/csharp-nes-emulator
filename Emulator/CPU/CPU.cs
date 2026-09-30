@@ -192,38 +192,6 @@ namespace NES_Emulator
                         BVC();
                         break;
 
-                    case CPUOpcodes.BBS7:
-                        BBS7();
-                        break;
-
-                    case CPUOpcodes.BBS6:
-                        BBS6();
-                        break;
-
-                    case CPUOpcodes.BBS5:
-                        BBS5();
-                        break;
-
-                    case CPUOpcodes.BBS4:
-                        BBS4();
-                        break;
-
-                    case CPUOpcodes.BBS3:
-                        BBS3();
-                        break;
-
-                    case CPUOpcodes.BBS2:
-                        BBS2();
-                        break;
-
-                    case CPUOpcodes.BBS1:
-                        BBS1();
-                        break;
-
-                    case CPUOpcodes.BBS0:
-                        BBS0();
-                        break;
-
                     case CPUOpcodes.BVS:
                         BVS();
                         break;
@@ -340,6 +308,16 @@ namespace NES_Emulator
                     case CPUOpcodes.LDA_Indirect_X:
                     case CPUOpcodes.LDA_Indirect_Y:
                         LDA(opcode.mode);
+                        break;
+                    
+                    // LAX
+                    case CPUOpcodes.LAX_ZeroPage:
+                    case CPUOpcodes.LAX_ZeroPage_Y:
+                    case CPUOpcodes.LAX_Absolute:
+                    case CPUOpcodes.LAX_Absolute_Y:
+                    case CPUOpcodes.LAX_Indirect_X:
+                    case CPUOpcodes.LAX_Indirect_Y:
+                        LAX(opcode.mode);
                         break;
 
                     // LDX
@@ -703,47 +681,6 @@ namespace NES_Emulator
             setBreakFlag();
         }
 
-        private void BBS7()
-        {
-            branch(((status >> 7) & 0x01) == 0x01);
-        }
-
-        private void BBS6()
-        {
-            branch(((status >> 6) & 0x01) == 0x01);
-        }
-
-        private void BBS5()
-        {
-            branch(((status >> 5) & 0x01) == 0x01);
-        }
-
-        private void BBS4()
-        {
-            branch(((status >> 4) & 0x01) == 0x01);
-        }
-
-        private void BBS3()
-        {
-            branch(((status >> 3) & 0x01) == 0x01);
-        }
-
-        private void BBS2()
-        {
-            branch(((status >> 2) & 0x01) == 0x01);
-        }
-
-        private void BBS1()
-        {
-            branch(((status >> 1) & 0x01) == 0x01);
-        }
-
-        private void BBS0()
-        {
-            branch((status & 0x01) == 0x01);
-        }
-
-
         private void BVC()
         {
             branch((status & CPUStatus.Overflow) == 0);
@@ -895,6 +832,15 @@ namespace NES_Emulator
             ushort addr = getAddressByMode(mode);
             byte value = _memory.read(addr);
             setRegisterAcc(value);
+        }
+
+        private void LAX(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+            setRegisterAcc(value);
+            register_x = value;
+            updateZeroAndNegativeFlags(register_x);
         }
 
         private void LDX(CPUAddressingMode mode)

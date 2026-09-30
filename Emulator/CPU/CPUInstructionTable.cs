@@ -52,16 +52,6 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.ASL_Absolute, new CPUInstruction { opcode = CPUOpcodes.ASL_Absolute, mnemonic = "ASL", bytes = 3, cycles = 6, mode = CPUAddressingMode.Absolute });
             lookupTable.Add(CPUOpcodes.ASL_Absolute_X, new CPUInstruction { opcode = CPUOpcodes.ASL_Absolute_X, mnemonic = "ASL", bytes = 3, cycles = 7, mode = CPUAddressingMode.Absolute_X });
 
-            // BBS* - Branch on Bit * Set
-            lookupTable.Add(CPUOpcodes.BBS7, new CPUInstruction { opcode = CPUOpcodes.BBS7, mnemonic = "BBS7", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
-            lookupTable.Add(CPUOpcodes.BBS6, new CPUInstruction { opcode = CPUOpcodes.BBS6, mnemonic = "BBS6", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
-            lookupTable.Add(CPUOpcodes.BBS5, new CPUInstruction { opcode = CPUOpcodes.BBS5, mnemonic = "BBS5", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
-            lookupTable.Add(CPUOpcodes.BBS4, new CPUInstruction { opcode = CPUOpcodes.BBS4, mnemonic = "BBS4", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
-            lookupTable.Add(CPUOpcodes.BBS3, new CPUInstruction { opcode = CPUOpcodes.BBS3, mnemonic = "BBS3", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
-            lookupTable.Add(CPUOpcodes.BBS2, new CPUInstruction { opcode = CPUOpcodes.BBS2, mnemonic = "BBS2", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
-            lookupTable.Add(CPUOpcodes.BBS1, new CPUInstruction { opcode = CPUOpcodes.BBS1, mnemonic = "BBS1", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
-            lookupTable.Add(CPUOpcodes.BBS0, new CPUInstruction { opcode = CPUOpcodes.BBS0, mnemonic = "BBS0", bytes = 3, cycles = 3, mode = CPUAddressingMode.ZeroPage });
-
 
             // BCC - Branch if Carry Clear
             lookupTable.Add(CPUOpcodes.BCC_Relative, new CPUInstruction { opcode = CPUOpcodes.BCC_Relative, mnemonic = "BCC", bytes = 2, cycles = 2 /*(+1 if branch succeeds +2 if to a new page)*/, mode = CPUAddressingMode.Relative });
@@ -185,6 +175,14 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.LDA_Absolute_Y, new CPUInstruction { opcode = CPUOpcodes.LDA_Absolute_Y, mnemonic = "LDA", bytes = 3, cycles = 4 /*(+1 if page crossed)*/, mode = CPUAddressingMode.Absolute_Y });
             lookupTable.Add(CPUOpcodes.LDA_Indirect_X, new CPUInstruction { opcode = CPUOpcodes.LDA_Indirect_X, mnemonic = "LDA", bytes = 2, cycles = 6, mode = CPUAddressingMode.Indirect_X });
             lookupTable.Add(CPUOpcodes.LDA_Indirect_Y, new CPUInstruction { opcode = CPUOpcodes.LDA_Indirect_Y, mnemonic = "LDA", bytes = 2, cycles = 5,/*(+1 if page crossed)*/ mode = CPUAddressingMode.Indirect_Y });
+
+            // LAX - Load Accumulator and X Register (Unofficial Opcode)
+            lookupTable.Add(CPUOpcodes.LAX_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.LAX_ZeroPage, mnemonic = "LAX", bytes = 2, cycles = 3, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.LAX_ZeroPage_Y, new CPUInstruction { opcode = CPUOpcodes.LAX_ZeroPage_Y, mnemonic = "LAX", bytes = 2, cycles = 4, mode = CPUAddressingMode.ZeroPage_Y });
+            lookupTable.Add(CPUOpcodes.LAX_Absolute, new CPUInstruction { opcode = CPUOpcodes.LAX_Absolute, mnemonic = "LAX", bytes = 3, cycles = 4, mode = CPUAddressingMode.Absolute });
+            lookupTable.Add(CPUOpcodes.LAX_Absolute_Y, new CPUInstruction { opcode = CPUOpcodes.LAX_Absolute_Y, mnemonic = "LAX", bytes = 3, cycles = 4 /*(+1 if page crossed)*/, mode = CPUAddressingMode.Absolute_Y });
+            lookupTable.Add(CPUOpcodes.LAX_Indirect_X, new CPUInstruction { opcode = CPUOpcodes.LAX_Indirect_X, mnemonic = "LAX", bytes = 2, cycles = 6, mode = CPUAddressingMode.Indirect_X });
+            lookupTable.Add(CPUOpcodes.LAX_Indirect_Y, new CPUInstruction { opcode = CPUOpcodes.LAX_Indirect_Y, mnemonic = "LAX", bytes = 2, cycles = 5 /*(+1 if page crossed)*/, mode = CPUAddressingMode.Indirect_Y });
 
             // LDX - Load X Register
             lookupTable.Add(CPUOpcodes.LDX_Immediate, new CPUInstruction { opcode = CPUOpcodes.LDX_Immediate, mnemonic = "LDX", bytes = 2, cycles = 2, mode = CPUAddressingMode.Immediate });

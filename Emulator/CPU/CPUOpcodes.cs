@@ -65,24 +65,6 @@ namespace NES_Emulator
         public const byte BRA_Relative = 0x80;
         public const byte BRA_Relative_Word = 0x83;
 
-        // BBS7 - Branch on Bit 7 Set 
-        public const byte BBS7 = 0xFF;
-        // BBS6 - Branch on Bit 6 Set 
-        public const byte BBS6 = 0xEF;
-        // BBS5 - Branch on Bit 5 Set 
-        public const byte BBS5 = 0xDF;
-        // BBS4 - Branch on Bit 4 Set 
-        public const byte BBS4 = 0xCF;
-        // BBS3 - Branch on Bit 3 Set 
-        public const byte BBS3 = 0xBF;
-        // BBS2 - Branch on Bit 2 Set 
-        public const byte BBS2 = 0xAF;
-        // BBS1 - Branch on Bit 1 Set 
-        public const byte BBS1 = 0x9F;
-        // BBS0 - Branch on Bit 0 Set 
-        public const byte BBS0 = 0x8F;
-
-
         // BRK
         public const byte BRK = 0x00;
 
@@ -190,6 +172,14 @@ namespace NES_Emulator
         public const byte LDY_ZeroPage_X = 0xB4;
         public const byte LDY_Absolute = 0xAC;
         public const byte LDY_Absolute_X = 0xBC;
+
+        // LAX
+        public const byte LAX_ZeroPage = 0xA7;
+        public const byte LAX_ZeroPage_Y = 0xB7;
+        public const byte LAX_Absolute = 0xAF;
+        public const byte LAX_Absolute_Y = 0xBF;
+        public const byte LAX_Indirect_X = 0xA3;
+        public const byte LAX_Indirect_Y = 0xB3;
 
         // LSR
         public const byte LSR_Accumulator = 0x4A;
