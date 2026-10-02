@@ -13,13 +13,11 @@ namespace NES_Emulator
         public byte stack_pointer { get; set; }
         public ushort program_counter { get; set; }
         public long Cycles { get; set; }
+        public long ExtraCycles { get; set; }
         public CPUInstructionTable instruction_table { get; set; }
-        public void Step(OnUpdateCallBack? callback);
+        public long Step(OnUpdateCallBack? callback);
         public byte setStatus(in byte Status);
         public void reset();
-        public void load(byte[] Program);
-        public void loadAndRun(byte[] Program, OnUpdateCallBack callback);
-
     }
 
 
@@ -50,6 +48,7 @@ namespace NES_Emulator
             status = CPUStatus.Initial;
             program_counter = PC_AT_POWER;
             Cycles = 1;
+            ExtraCycles = 0;
             instruction_table = new CPUInstructionTable();
             stack_pointer = STACK_RESET;
         }
@@ -61,6 +60,7 @@ namespace NES_Emulator
         public byte stack_pointer { get; set; }
         public ushort program_counter { get; set; }
         public long Cycles { get; set; }
+        public long ExtraCycles { get; set; }
         public iMemory _memory { get; set; }
         public CPUInstructionTable instruction_table { get; set; }
 
@@ -68,546 +68,562 @@ namespace NES_Emulator
         private const byte STACK_RESET = 0xFD;
         private const ushort PC_AT_POWER = 0xFFFC;
 
-        public void Step(OnUpdateCallBack? callback = null)
+        public long Step(OnUpdateCallBack? callback = null)
         {
-            while (true)
+            if (callback != null) callback();
+
+            ExtraCycles = 0;
+
+            // DEBUG content
+            ushort pc_for_log = program_counter;
+
+            ICPUInstruction instruction = GetNextInstruction();
+
+            // Run the instruction
+            ExecuteInstruction(instruction);
+
+            // Cycle control
+            long totalCycles = instruction.BaseCycles + ExtraCycles;
+            Cycles += totalCycles;
+
+
+
+            // DEBUG LOG CONTENT INIT
+            List<string> data = new List<string>();
+            if (instruction.bytes > 1)
             {
-                if (callback != null) callback();
-
-                ushort pc_for_log = program_counter;
-                byte instruction = _memory.read(program_counter);
-                program_counter++;
-
-                CPUInstruction opcode = instruction_table.GetInstruction(instruction);
-                int _cycle = opcode.BaseCycles;
-
-                if (instruction == CPUOpcodes.BRK)
+                for (ushort i = 1; i < instruction.bytes; i++)
                 {
-                    BRK();
-                    return;
-                }
-
-                // DEBUG LOG CONTENT INIT
-                List<string> data = new List<string>();
-                if (opcode.bytes > 1)
-                {
-                    for (ushort i = 1; i < opcode.bytes; i++)
-                    {
-                        data.Add(_memory.read((ushort)(pc_for_log + i)).ToString("X2"));
-                    }
-                }
-                var opcodePlusData = $"{opcode.opcode:X2} {String.Join(' ', data.ToArray())}".PadRight(10);
-                var mnemonicPlusAddr = $"{opcode.mnemonic} ${String.Join("", data.ToArray().Reverse())}".PadRight(32);
-                // DEBUG LOG CONTENT END
-
-                Cycles += opcode.BaseCycles;
-
-                Console.WriteLine($"{pc_for_log:X4}  {opcodePlusData} {mnemonicPlusAddr} A:{register_acc:X2} X:{register_x:X2} Y:{register_y:X2} P:{status:X2} SP:{stack_pointer:X2} CYC: {Cycles}");
-
-                switch (instruction)
-                {
-                    // ADC
-                    case CPUOpcodes.ADC_Immediate:
-                    case CPUOpcodes.ADC_ZeroPage:
-                    case CPUOpcodes.ADC_ZeroPage_X:
-                    case CPUOpcodes.ADC_Absolute:
-                    case CPUOpcodes.ADC_Absolute_X:
-                    case CPUOpcodes.ADC_Absolute_Y:
-                    case CPUOpcodes.ADC_Indirect_X:
-                    case CPUOpcodes.ADC_Indirect_Y:
-                        ADC(opcode.mode);
-                        break;
-
-                    // AND
-                    case CPUOpcodes.AND_Immediate:
-                    case CPUOpcodes.AND_ZeroPage:
-                    case CPUOpcodes.AND_ZeroPage_X:
-                    case CPUOpcodes.AND_Absolute:
-                    case CPUOpcodes.AND_Absolute_X:
-                    case CPUOpcodes.AND_Absolute_Y:
-                    case CPUOpcodes.AND_Indirect_X:
-                    case CPUOpcodes.AND_Indirect_Y:
-                        AND(opcode.mode);
-                        break;
-
-                    // ASL
-                    case CPUOpcodes.ASL_Accumulator:
-                        ASL();
-                        break;
-
-                    case CPUOpcodes.ASL_ZeroPage:
-                    case CPUOpcodes.ASL_ZeroPage_X:
-                    case CPUOpcodes.ASL_Absolute:
-                    case CPUOpcodes.ASL_Absolute_X:
-                        ASL(opcode.mode);
-                        break;
-
-                    // SLO
-                    case CPUOpcodes.SLO_ZeroPage:
-                    case CPUOpcodes.SLO_ZeroPage_X:
-                    case CPUOpcodes.SLO_Absolute:
-                    case CPUOpcodes.SLO_Absolute_X:
-                    case CPUOpcodes.SLO_Absolute_Y:
-                    case CPUOpcodes.SLO_Indirect_X:
-                    case CPUOpcodes.SLO_Indirect_Y:
-                        SLO(opcode.mode);
-                        break;
-
-                    // RLA
-                    case CPUOpcodes.RLA_ZeroPage:
-                    case CPUOpcodes.RLA_ZeroPage_X:
-                    case CPUOpcodes.RLA_Absolute:
-                    case CPUOpcodes.RLA_Absolute_X:
-                    case CPUOpcodes.RLA_Absolute_Y:
-                    case CPUOpcodes.RLA_Indirect_X:
-                    case CPUOpcodes.RLA_Indirect_Y:
-                        RLA(opcode.mode);
-                        break;
-
-                    // RRA
-                    case CPUOpcodes.RRA_ZeroPage:
-                    case CPUOpcodes.RRA_ZeroPage_X:
-                    case CPUOpcodes.RRA_Absolute:
-                    case CPUOpcodes.RRA_Absolute_X:
-                    case CPUOpcodes.RRA_Absolute_Y:
-                    case CPUOpcodes.RRA_Indirect_X:
-                    case CPUOpcodes.RRA_Indirect_Y:
-                        RRA(opcode.mode);
-                        break;
-
-                    // SRE
-                    case CPUOpcodes.SRE_ZeroPage:
-                    case CPUOpcodes.SRE_ZeroPage_X:
-                    case CPUOpcodes.SRE_Absolute:
-                    case CPUOpcodes.SRE_Absolute_X:
-                    case CPUOpcodes.SRE_Absolute_Y:
-                    case CPUOpcodes.SRE_Indirect_X:
-                    case CPUOpcodes.SRE_Indirect_Y:
-                        SRE(opcode.mode);
-                        break;
-
-                    // ASR
-                    case CPUOpcodes.ASR_ZeroPage:
-                    case CPUOpcodes.ASR_ZeroPage_X:
-                        ASR();
-                        break;
-
-                    case CPUOpcodes.BCC_Relative:
-                        BCC();
-                        break;
-
-                    case CPUOpcodes.BCS_Relative:
-                        BCS();
-                        break;
-
-                    case CPUOpcodes.BEQ_Relative:
-                        BEQ();
-                        break;
-
-                    case CPUOpcodes.BIT_Immediate:
-                    case CPUOpcodes.BIT_Absolute:
-                    case CPUOpcodes.BIT_Absolute_X:
-                    case CPUOpcodes.BIT_ZeroPage:
-                    case CPUOpcodes.BIT_ZeroPage_X:
-                        BIT(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.BMI_Relative:
-                        BMI();
-                        break;
-
-                    case CPUOpcodes.BNE_Relative:
-                        BNE();
-                        break;
-
-                    case CPUOpcodes.BPL_Relative:
-                        BPL();
-                        break;
-
-                    case CPUOpcodes.BRA_Relative:
-                        NOP(opcode.mode);
-                        break;
-                    case CPUOpcodes.SAX_Indirect_X:
-                    case CPUOpcodes.SAX_ZeroPage:
-                    case CPUOpcodes.SAX_Absolute:
-                    case CPUOpcodes.SAX_ZeroPage_Y:
-                        SAX(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.BVC:
-                        BVC();
-                        break;
-
-                    case CPUOpcodes.BVS:
-                        BVS();
-                        break;
-
-                    case CPUOpcodes.CLC:
-                        CLC();
-                        break;
-
-                    case CPUOpcodes.CLD:
-                        CLD();
-                        break;
-
-                    case CPUOpcodes.CLI:
-                        CLI();
-                        break;
-
-                    case CPUOpcodes.CLV:
-                        CLV();
-                        break;
-
-                    // CMP
-                    case CPUOpcodes.CMP_Immediate:
-                    case CPUOpcodes.CMP_ZeroPage:
-                    case CPUOpcodes.CMP_ZeroPage_X:
-                    case CPUOpcodes.CMP_Absolute:
-                    case CPUOpcodes.CMP_Absolute_X:
-                    case CPUOpcodes.CMP_Absolute_Y:
-                    case CPUOpcodes.CMP_Indirect_X:
-                    case CPUOpcodes.CMP_Indirect_Y:
-                        CMP(opcode.mode);
-                        break;
-
-                    // CPX
-                    case CPUOpcodes.CPX_Immediate:
-                    case CPUOpcodes.CPX_ZeroPage:
-                    case CPUOpcodes.CPX_Absolute:
-                        CPX(opcode.mode);
-                        break;
-
-                    // CPY
-                    case CPUOpcodes.CPY_Immediate:
-                    case CPUOpcodes.CPY_ZeroPage:
-                    case CPUOpcodes.CPY_Absolute:
-                        CPY(opcode.mode);
-                        break;
-
-                    // DEC
-                    case CPUOpcodes.DEC_Accumulator:
-                        NOP(opcode.mode);
-                        break;
-                    case CPUOpcodes.DEC_ZeroPage:
-                    case CPUOpcodes.DEC_ZeroPage_X:
-                    case CPUOpcodes.DEC_Absolute:
-                    case CPUOpcodes.DEC_Absolute_X:
-                        DEC(opcode.mode);
-                        break;
-
-                    // DCP
-                    case CPUOpcodes.DCP_ZeroPage:
-                    case CPUOpcodes.DCP_ZeroPage_X:
-                    case CPUOpcodes.DCP_Absolute:
-                    case CPUOpcodes.DCP_Absolute_X:
-                    case CPUOpcodes.DCP_Absolute_Y:
-                    case CPUOpcodes.DCP_Indirect_X:
-                    case CPUOpcodes.DCP_Indirect_Y:
-                        DCP(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.DEX:
-                        DEX();
-                        break;
-
-                    case CPUOpcodes.DEY:
-                        DEY();
-                        break;
-
-                    // EOR
-                    case CPUOpcodes.EOR_Immediate:
-                    case CPUOpcodes.EOR_ZeroPage:
-                    case CPUOpcodes.EOR_ZeroPage_X:
-                    case CPUOpcodes.EOR_Absolute:
-                    case CPUOpcodes.EOR_Absolute_X:
-                    case CPUOpcodes.EOR_Absolute_Y:
-                    case CPUOpcodes.EOR_Indirect_X:
-                    case CPUOpcodes.EOR_Indirect_Y:
-                        EOR(opcode.mode);
-                        break;
-
-                    // INC
-                    case CPUOpcodes.INC_Accumulator:
-                        NOP(opcode.mode);
-                        break;
-                    case CPUOpcodes.INC_ZeroPage:
-                    case CPUOpcodes.INC_ZeroPage_X:
-                    case CPUOpcodes.INC_Absolute:
-                    case CPUOpcodes.INC_Absolute_X:
-                        INC(opcode.mode);
-                        break;
-
-                    // ISC
-                    case CPUOpcodes.ISC_ZeroPage:
-                    case CPUOpcodes.ISC_ZeroPage_X:
-                    case CPUOpcodes.ISC_Absolute:
-                    case CPUOpcodes.ISC_Absolute_X:
-                    case CPUOpcodes.ISC_Absolute_Y:
-                    case CPUOpcodes.ISC_Indirect_X:
-                    case CPUOpcodes.ISC_Indirect_Y:
-                        ISC(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.INX:
-                        INX();
-                        break;
-
-                    case CPUOpcodes.INY:
-                        INY();
-                        break;
-
-                    // JMP
-                    case CPUOpcodes.JMP_Absolute:
-                    case CPUOpcodes.JMP_Indirect:
-                        JMP(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.JSR:
-                        JSR();
-                        break;
-
-                    // LDA
-                    case CPUOpcodes.LDA_Immediate:
-                    case CPUOpcodes.LDA_ZeroPage:
-                    case CPUOpcodes.LDA_ZeroPage_X:
-                    case CPUOpcodes.LDA_Absolute:
-                    case CPUOpcodes.LDA_Absolute_X:
-                    case CPUOpcodes.LDA_Absolute_Y:
-                    case CPUOpcodes.LDA_Indirect_X:
-                    case CPUOpcodes.LDA_Indirect_Y:
-                        LDA(opcode.mode);
-                        break;
-
-                    // LAX
-                    case CPUOpcodes.LAX_ZeroPage:
-                    case CPUOpcodes.LAX_ZeroPage_Y:
-                    case CPUOpcodes.LAX_Absolute:
-                    case CPUOpcodes.LAX_Absolute_Y:
-                    case CPUOpcodes.LAX_Indirect_X:
-                    case CPUOpcodes.LAX_Indirect_Y:
-                        LAX(opcode.mode);
-                        break;
-
-                    // LDX
-                    case CPUOpcodes.LDX_Immediate:
-                    case CPUOpcodes.LDX_ZeroPage:
-                    case CPUOpcodes.LDX_ZeroPage_Y:
-                    case CPUOpcodes.LDX_Absolute:
-                    case CPUOpcodes.LDX_Absolute_Y:
-                        LDX(opcode.mode);
-                        break;
-
-                    // LDY
-                    case CPUOpcodes.LDY_Immediate:
-                    case CPUOpcodes.LDY_ZeroPage:
-                    case CPUOpcodes.LDY_ZeroPage_X:
-                    case CPUOpcodes.LDY_Absolute:
-                    case CPUOpcodes.LDY_Absolute_X:
-                        LDY(opcode.mode);
-                        break;
-
-                    // LSR
-                    case CPUOpcodes.LSR_Accumulator:
-                        LSR();
-                        break;
-
-                    case CPUOpcodes.LSR_ZeroPage:
-                    case CPUOpcodes.LSR_ZeroPage_X:
-                    case CPUOpcodes.LSR_Absolute:
-                    case CPUOpcodes.LSR_Absolute_X:
-                        LSR(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.NOP:
-                        break;
-
-                    case CPUOpcodes.NOP_Unofficial_F4:
-                    case CPUOpcodes.NOP_Unofficial_D4:
-                    case CPUOpcodes.NOP_Unofficial_5C:
-                    case CPUOpcodes.NOP_Unofficial_7C:
-                    case CPUOpcodes.NOP_Unofficial_DC:
-                    case CPUOpcodes.NOP_Unofficial_FC:
-                        NOP(opcode.mode);
-                        break;
-
-                    // ORA
-                    case CPUOpcodes.ORA_Immediate:
-                    case CPUOpcodes.ORA_ZeroPage:
-                    case CPUOpcodes.ORA_ZeroPage_X:
-                    case CPUOpcodes.ORA_Absolute:
-                    case CPUOpcodes.ORA_Absolute_X:
-                    case CPUOpcodes.ORA_Absolute_Y:
-                    case CPUOpcodes.ORA_Indirect_X:
-                    case CPUOpcodes.ORA_Indirect_Y:
-                        ORA(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.PHA:
-                        PHA();
-                        break;
-
-                    case CPUOpcodes.PHY:
-                        NOP(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.PHX:
-                        NOP(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.PHP:
-                        PHP();
-                        break;
-
-                    case CPUOpcodes.PLA:
-                        PLA();
-                        break;
-
-                    case CPUOpcodes.PLY:
-                        NOP(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.PLX:
-                        NOP(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.PLP:
-                        PLP();
-                        break;
-
-                    // ROL
-                    case CPUOpcodes.ROL_Accumulator:
-                        ROL();
-                        break;
-
-                    case CPUOpcodes.ROL_ZeroPage:
-                    case CPUOpcodes.ROL_ZeroPage_X:
-                    case CPUOpcodes.ROL_Absolute:
-                    case CPUOpcodes.ROL_Absolute_X:
-                        ROL(opcode.mode);
-                        break;
-
-                    // ROR
-                    case CPUOpcodes.ROR_Accumulator:
-                        ROR();
-                        break;
-
-                    case CPUOpcodes.ROR_ZeroPage:
-                    case CPUOpcodes.ROR_ZeroPage_X:
-                    case CPUOpcodes.ROR_Absolute:
-                    case CPUOpcodes.ROR_Absolute_X:
-                        ROR(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.RTI:
-                        RTI();
-                        break;
-
-                    case CPUOpcodes.RTS:
-                        RTS();
-                        break;
-
-                    // SBC
-                    case CPUOpcodes.SBC_Immediate:
-                    case CPUOpcodes.SBC_ZeroPage:
-                    case CPUOpcodes.SBC_ZeroPage_X:
-                    case CPUOpcodes.SBC_Absolute:
-                    case CPUOpcodes.SBC_Absolute_X:
-                    case CPUOpcodes.SBC_Absolute_Y:
-                    case CPUOpcodes.SBC_Indirect_X:
-                    case CPUOpcodes.SBC_Indirect_Y:
-                    // USBC - Unofficial Opcode
-                    case CPUOpcodes.USBC_Immediate:
-                        SBC(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.SEC:
-                        SEC();
-                        break;
-
-                    case CPUOpcodes.SED:
-                        SED();
-                        break;
-
-                    case CPUOpcodes.SEI:
-                        SEI();
-                        break;
-
-                    // STA
-                    case CPUOpcodes.STA_ZeroPage:
-                    case CPUOpcodes.STA_ZeroPage_X:
-                    case CPUOpcodes.STA_Absolute:
-                    case CPUOpcodes.STA_Absolute_X:
-                    case CPUOpcodes.STA_Absolute_Y:
-                    case CPUOpcodes.STA_Indirect_X:
-                    case CPUOpcodes.STA_Indirect_Y:
-                        STA(opcode.mode);
-                        break;
-
-                    // STX
-                    case CPUOpcodes.STX_ZeroPage:
-                    case CPUOpcodes.STX_ZeroPage_Y:
-                    case CPUOpcodes.STX_Absolute:
-                        STX(opcode.mode);
-                        break;
-
-                    // STY
-                    case CPUOpcodes.STY_ZeroPage:
-                    case CPUOpcodes.STY_ZeroPage_X:
-                    case CPUOpcodes.STY_Absolute:
-                        STY(opcode.mode);
-                        break;
-
-                    // STZ
-                    case CPUOpcodes.STZ_ZeroPage_X:
-                        NOP(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.STZ_ZeroPage:
-                    case CPUOpcodes.STZ_Absolute:
-                    case CPUOpcodes.STZ_Absolute_X:
-                        STZ(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.TAX:
-                        TAX();
-                        break;
-
-                    case CPUOpcodes.TAY:
-                        TAY();
-                        break;
-
-                    case CPUOpcodes.TSX:
-                        TSX();
-                        break;
-
-                    case CPUOpcodes.TXA:
-                        TXA();
-                        break;
-
-                    case CPUOpcodes.TXS:
-                        TXS();
-                        break;
-
-                    case CPUOpcodes.TYA:
-                        TYA();
-                        break;
-
-                    case CPUOpcodes.TRB_ZeroPage:
-                        NOP(opcode.mode);
-                        break;
-                    case CPUOpcodes.TRB_Absolute:
-                        NOP(opcode.mode);
-                        break;
-
-                    case CPUOpcodes.TSB_ZeroPage:
-                    case CPUOpcodes.TSB_Absolute:
-                        TSB(opcode.mode);
-                        break;
-
-                    default:
-                        throw new Exception($"Invalid instruction: {opcode.opcode:X2}({opcode.mnemonic})!");
+                    data.Add(_memory.read((ushort)(pc_for_log + i)).ToString("X2"));
                 }
             }
+
+            var opcodePlusData = $"{instruction.opcode:X2} {String.Join(' ', data.ToArray())}".PadRight(10);
+            var mnemonicPlusAddr = $"{instruction.mnemonic} ${String.Join("", data.ToArray().Reverse())}".PadRight(32);
+            Console.WriteLine($"{pc_for_log:X4}  {opcodePlusData} {mnemonicPlusAddr} A:{register_acc:X2} X:{register_x:X2} Y:{register_y:X2} P:{status:X2} SP:{stack_pointer:X2} CYC: {Cycles}");
+            // DEBUG LOG CONTENT END
+
+            return totalCycles;
+        }
+
+        private void ExecuteInstruction(ICPUInstruction instruction)
+        {
+            switch (instruction.opcode)
+            {
+                // BRK
+                case CPUOpcodes.BRK:
+                    BRK();
+                    break;
+
+                // ADC
+                case CPUOpcodes.ADC_Immediate:
+                case CPUOpcodes.ADC_ZeroPage:
+                case CPUOpcodes.ADC_ZeroPage_X:
+                case CPUOpcodes.ADC_Absolute:
+                case CPUOpcodes.ADC_Absolute_X:
+                case CPUOpcodes.ADC_Absolute_Y:
+                case CPUOpcodes.ADC_Indirect_X:
+                case CPUOpcodes.ADC_Indirect_Y:
+                    ADC(instruction.mode);
+                    break;
+
+                // AND
+                case CPUOpcodes.AND_Immediate:
+                case CPUOpcodes.AND_ZeroPage:
+                case CPUOpcodes.AND_ZeroPage_X:
+                case CPUOpcodes.AND_Absolute:
+                case CPUOpcodes.AND_Absolute_X:
+                case CPUOpcodes.AND_Absolute_Y:
+                case CPUOpcodes.AND_Indirect_X:
+                case CPUOpcodes.AND_Indirect_Y:
+                    AND(instruction.mode);
+                    break;
+
+                // ASL
+                case CPUOpcodes.ASL_Accumulator:
+                    ASL();
+                    break;
+
+                case CPUOpcodes.ASL_ZeroPage:
+                case CPUOpcodes.ASL_ZeroPage_X:
+                case CPUOpcodes.ASL_Absolute:
+                case CPUOpcodes.ASL_Absolute_X:
+                    ASL(instruction.mode);
+                    break;
+
+                // SLO
+                case CPUOpcodes.SLO_ZeroPage:
+                case CPUOpcodes.SLO_ZeroPage_X:
+                case CPUOpcodes.SLO_Absolute:
+                case CPUOpcodes.SLO_Absolute_X:
+                case CPUOpcodes.SLO_Absolute_Y:
+                case CPUOpcodes.SLO_Indirect_X:
+                case CPUOpcodes.SLO_Indirect_Y:
+                    SLO(instruction.mode);
+                    break;
+
+                // RLA
+                case CPUOpcodes.RLA_ZeroPage:
+                case CPUOpcodes.RLA_ZeroPage_X:
+                case CPUOpcodes.RLA_Absolute:
+                case CPUOpcodes.RLA_Absolute_X:
+                case CPUOpcodes.RLA_Absolute_Y:
+                case CPUOpcodes.RLA_Indirect_X:
+                case CPUOpcodes.RLA_Indirect_Y:
+                    RLA(instruction.mode);
+                    break;
+
+                // RRA
+                case CPUOpcodes.RRA_ZeroPage:
+                case CPUOpcodes.RRA_ZeroPage_X:
+                case CPUOpcodes.RRA_Absolute:
+                case CPUOpcodes.RRA_Absolute_X:
+                case CPUOpcodes.RRA_Absolute_Y:
+                case CPUOpcodes.RRA_Indirect_X:
+                case CPUOpcodes.RRA_Indirect_Y:
+                    RRA(instruction.mode);
+                    break;
+
+                // SRE
+                case CPUOpcodes.SRE_ZeroPage:
+                case CPUOpcodes.SRE_ZeroPage_X:
+                case CPUOpcodes.SRE_Absolute:
+                case CPUOpcodes.SRE_Absolute_X:
+                case CPUOpcodes.SRE_Absolute_Y:
+                case CPUOpcodes.SRE_Indirect_X:
+                case CPUOpcodes.SRE_Indirect_Y:
+                    SRE(instruction.mode);
+                    break;
+
+                // ASR
+                case CPUOpcodes.ASR_ZeroPage:
+                case CPUOpcodes.ASR_ZeroPage_X:
+                    ASR();
+                    break;
+
+                case CPUOpcodes.BCC_Relative:
+                    BCC();
+                    break;
+
+                case CPUOpcodes.BCS_Relative:
+                    BCS();
+                    break;
+
+                case CPUOpcodes.BEQ_Relative:
+                    BEQ();
+                    break;
+
+                case CPUOpcodes.BIT_Immediate:
+                case CPUOpcodes.BIT_Absolute:
+                case CPUOpcodes.BIT_Absolute_X:
+                case CPUOpcodes.BIT_ZeroPage:
+                case CPUOpcodes.BIT_ZeroPage_X:
+                    BIT(instruction.mode);
+                    break;
+
+                case CPUOpcodes.BMI_Relative:
+                    BMI();
+                    break;
+
+                case CPUOpcodes.BNE_Relative:
+                    BNE();
+                    break;
+
+                case CPUOpcodes.BPL_Relative:
+                    BPL();
+                    break;
+
+                case CPUOpcodes.BRA_Relative:
+                    NOP(instruction.mode);
+                    break;
+                case CPUOpcodes.SAX_Indirect_X:
+                case CPUOpcodes.SAX_ZeroPage:
+                case CPUOpcodes.SAX_Absolute:
+                case CPUOpcodes.SAX_ZeroPage_Y:
+                    SAX(instruction.mode);
+                    break;
+
+                case CPUOpcodes.BVC:
+                    BVC();
+                    break;
+
+                case CPUOpcodes.BVS:
+                    BVS();
+                    break;
+
+                case CPUOpcodes.CLC:
+                    CLC();
+                    break;
+
+                case CPUOpcodes.CLD:
+                    CLD();
+                    break;
+
+                case CPUOpcodes.CLI:
+                    CLI();
+                    break;
+
+                case CPUOpcodes.CLV:
+                    CLV();
+                    break;
+
+                // CMP
+                case CPUOpcodes.CMP_Immediate:
+                case CPUOpcodes.CMP_ZeroPage:
+                case CPUOpcodes.CMP_ZeroPage_X:
+                case CPUOpcodes.CMP_Absolute:
+                case CPUOpcodes.CMP_Absolute_X:
+                case CPUOpcodes.CMP_Absolute_Y:
+                case CPUOpcodes.CMP_Indirect_X:
+                case CPUOpcodes.CMP_Indirect_Y:
+                    CMP(instruction.mode);
+                    break;
+
+                // CPX
+                case CPUOpcodes.CPX_Immediate:
+                case CPUOpcodes.CPX_ZeroPage:
+                case CPUOpcodes.CPX_Absolute:
+                    CPX(instruction.mode);
+                    break;
+
+                // CPY
+                case CPUOpcodes.CPY_Immediate:
+                case CPUOpcodes.CPY_ZeroPage:
+                case CPUOpcodes.CPY_Absolute:
+                    CPY(instruction.mode);
+                    break;
+
+                // DEC
+                case CPUOpcodes.DEC_Accumulator:
+                    NOP(instruction.mode);
+                    break;
+                case CPUOpcodes.DEC_ZeroPage:
+                case CPUOpcodes.DEC_ZeroPage_X:
+                case CPUOpcodes.DEC_Absolute:
+                case CPUOpcodes.DEC_Absolute_X:
+                    DEC(instruction.mode);
+                    break;
+
+                // DCP
+                case CPUOpcodes.DCP_ZeroPage:
+                case CPUOpcodes.DCP_ZeroPage_X:
+                case CPUOpcodes.DCP_Absolute:
+                case CPUOpcodes.DCP_Absolute_X:
+                case CPUOpcodes.DCP_Absolute_Y:
+                case CPUOpcodes.DCP_Indirect_X:
+                case CPUOpcodes.DCP_Indirect_Y:
+                    DCP(instruction.mode);
+                    break;
+
+                case CPUOpcodes.DEX:
+                    DEX();
+                    break;
+
+                case CPUOpcodes.DEY:
+                    DEY();
+                    break;
+
+                // EOR
+                case CPUOpcodes.EOR_Immediate:
+                case CPUOpcodes.EOR_ZeroPage:
+                case CPUOpcodes.EOR_ZeroPage_X:
+                case CPUOpcodes.EOR_Absolute:
+                case CPUOpcodes.EOR_Absolute_X:
+                case CPUOpcodes.EOR_Absolute_Y:
+                case CPUOpcodes.EOR_Indirect_X:
+                case CPUOpcodes.EOR_Indirect_Y:
+                    EOR(instruction.mode);
+                    break;
+
+                // INC
+                case CPUOpcodes.INC_Accumulator:
+                    NOP(instruction.mode);
+                    break;
+                case CPUOpcodes.INC_ZeroPage:
+                case CPUOpcodes.INC_ZeroPage_X:
+                case CPUOpcodes.INC_Absolute:
+                case CPUOpcodes.INC_Absolute_X:
+                    INC(instruction.mode);
+                    break;
+
+                // ISC
+                case CPUOpcodes.ISC_ZeroPage:
+                case CPUOpcodes.ISC_ZeroPage_X:
+                case CPUOpcodes.ISC_Absolute:
+                case CPUOpcodes.ISC_Absolute_X:
+                case CPUOpcodes.ISC_Absolute_Y:
+                case CPUOpcodes.ISC_Indirect_X:
+                case CPUOpcodes.ISC_Indirect_Y:
+                    ISC(instruction.mode);
+                    break;
+
+                case CPUOpcodes.INX:
+                    INX();
+                    break;
+
+                case CPUOpcodes.INY:
+                    INY();
+                    break;
+
+                // JMP
+                case CPUOpcodes.JMP_Absolute:
+                case CPUOpcodes.JMP_Indirect:
+                    JMP(instruction.mode);
+                    break;
+
+                case CPUOpcodes.JSR:
+                    JSR();
+                    break;
+
+                // LDA
+                case CPUOpcodes.LDA_Immediate:
+                case CPUOpcodes.LDA_ZeroPage:
+                case CPUOpcodes.LDA_ZeroPage_X:
+                case CPUOpcodes.LDA_Absolute:
+                case CPUOpcodes.LDA_Absolute_X:
+                case CPUOpcodes.LDA_Absolute_Y:
+                case CPUOpcodes.LDA_Indirect_X:
+                case CPUOpcodes.LDA_Indirect_Y:
+                    LDA(instruction.mode);
+                    break;
+
+                // LAX
+                case CPUOpcodes.LAX_ZeroPage:
+                case CPUOpcodes.LAX_ZeroPage_Y:
+                case CPUOpcodes.LAX_Absolute:
+                case CPUOpcodes.LAX_Absolute_Y:
+                case CPUOpcodes.LAX_Indirect_X:
+                case CPUOpcodes.LAX_Indirect_Y:
+                    LAX(instruction.mode);
+                    break;
+
+                // LDX
+                case CPUOpcodes.LDX_Immediate:
+                case CPUOpcodes.LDX_ZeroPage:
+                case CPUOpcodes.LDX_ZeroPage_Y:
+                case CPUOpcodes.LDX_Absolute:
+                case CPUOpcodes.LDX_Absolute_Y:
+                    LDX(instruction.mode);
+                    break;
+
+                // LDY
+                case CPUOpcodes.LDY_Immediate:
+                case CPUOpcodes.LDY_ZeroPage:
+                case CPUOpcodes.LDY_ZeroPage_X:
+                case CPUOpcodes.LDY_Absolute:
+                case CPUOpcodes.LDY_Absolute_X:
+                    LDY(instruction.mode);
+                    break;
+
+                // LSR
+                case CPUOpcodes.LSR_Accumulator:
+                    LSR();
+                    break;
+
+                case CPUOpcodes.LSR_ZeroPage:
+                case CPUOpcodes.LSR_ZeroPage_X:
+                case CPUOpcodes.LSR_Absolute:
+                case CPUOpcodes.LSR_Absolute_X:
+                    LSR(instruction.mode);
+                    break;
+
+                case CPUOpcodes.NOP:
+                    break;
+
+                case CPUOpcodes.NOP_Unofficial_F4:
+                case CPUOpcodes.NOP_Unofficial_D4:
+                case CPUOpcodes.NOP_Unofficial_5C:
+                case CPUOpcodes.NOP_Unofficial_7C:
+                case CPUOpcodes.NOP_Unofficial_DC:
+                case CPUOpcodes.NOP_Unofficial_FC:
+                    NOP(instruction.mode);
+                    break;
+
+                // ORA
+                case CPUOpcodes.ORA_Immediate:
+                case CPUOpcodes.ORA_ZeroPage:
+                case CPUOpcodes.ORA_ZeroPage_X:
+                case CPUOpcodes.ORA_Absolute:
+                case CPUOpcodes.ORA_Absolute_X:
+                case CPUOpcodes.ORA_Absolute_Y:
+                case CPUOpcodes.ORA_Indirect_X:
+                case CPUOpcodes.ORA_Indirect_Y:
+                    ORA(instruction.mode);
+                    break;
+
+                case CPUOpcodes.PHA:
+                    PHA();
+                    break;
+
+                case CPUOpcodes.PHY:
+                    NOP(instruction.mode);
+                    break;
+
+                case CPUOpcodes.PHX:
+                    NOP(instruction.mode);
+                    break;
+
+                case CPUOpcodes.PHP:
+                    PHP();
+                    break;
+
+                case CPUOpcodes.PLA:
+                    PLA();
+                    break;
+
+                case CPUOpcodes.PLY:
+                    NOP(instruction.mode);
+                    break;
+
+                case CPUOpcodes.PLX:
+                    NOP(instruction.mode);
+                    break;
+
+                case CPUOpcodes.PLP:
+                    PLP();
+                    break;
+
+                // ROL
+                case CPUOpcodes.ROL_Accumulator:
+                    ROL();
+                    break;
+
+                case CPUOpcodes.ROL_ZeroPage:
+                case CPUOpcodes.ROL_ZeroPage_X:
+                case CPUOpcodes.ROL_Absolute:
+                case CPUOpcodes.ROL_Absolute_X:
+                    ROL(instruction.mode);
+                    break;
+
+                // ROR
+                case CPUOpcodes.ROR_Accumulator:
+                    ROR();
+                    break;
+
+                case CPUOpcodes.ROR_ZeroPage:
+                case CPUOpcodes.ROR_ZeroPage_X:
+                case CPUOpcodes.ROR_Absolute:
+                case CPUOpcodes.ROR_Absolute_X:
+                    ROR(instruction.mode);
+                    break;
+
+                case CPUOpcodes.RTI:
+                    RTI();
+                    break;
+
+                case CPUOpcodes.RTS:
+                    RTS();
+                    break;
+
+                // SBC
+                case CPUOpcodes.SBC_Immediate:
+                case CPUOpcodes.SBC_ZeroPage:
+                case CPUOpcodes.SBC_ZeroPage_X:
+                case CPUOpcodes.SBC_Absolute:
+                case CPUOpcodes.SBC_Absolute_X:
+                case CPUOpcodes.SBC_Absolute_Y:
+                case CPUOpcodes.SBC_Indirect_X:
+                case CPUOpcodes.SBC_Indirect_Y:
+                // USBC - Unofficial Opcode
+                case CPUOpcodes.USBC_Immediate:
+                    SBC(instruction.mode);
+                    break;
+
+                case CPUOpcodes.SEC:
+                    SEC();
+                    break;
+
+                case CPUOpcodes.SED:
+                    SED();
+                    break;
+
+                case CPUOpcodes.SEI:
+                    SEI();
+                    break;
+
+                // STA
+                case CPUOpcodes.STA_ZeroPage:
+                case CPUOpcodes.STA_ZeroPage_X:
+                case CPUOpcodes.STA_Absolute:
+                case CPUOpcodes.STA_Absolute_X:
+                case CPUOpcodes.STA_Absolute_Y:
+                case CPUOpcodes.STA_Indirect_X:
+                case CPUOpcodes.STA_Indirect_Y:
+                    STA(instruction.mode);
+                    break;
+
+                // STX
+                case CPUOpcodes.STX_ZeroPage:
+                case CPUOpcodes.STX_ZeroPage_Y:
+                case CPUOpcodes.STX_Absolute:
+                    STX(instruction.mode);
+                    break;
+
+                // STY
+                case CPUOpcodes.STY_ZeroPage:
+                case CPUOpcodes.STY_ZeroPage_X:
+                case CPUOpcodes.STY_Absolute:
+                    STY(instruction.mode);
+                    break;
+
+                // STZ
+                case CPUOpcodes.STZ_ZeroPage_X:
+                    NOP(instruction.mode);
+                    break;
+
+                case CPUOpcodes.STZ_ZeroPage:
+                case CPUOpcodes.STZ_Absolute:
+                case CPUOpcodes.STZ_Absolute_X:
+                    STZ(instruction.mode);
+                    break;
+
+                case CPUOpcodes.TAX:
+                    TAX();
+                    break;
+
+                case CPUOpcodes.TAY:
+                    TAY();
+                    break;
+
+                case CPUOpcodes.TSX:
+                    TSX();
+                    break;
+
+                case CPUOpcodes.TXA:
+                    TXA();
+                    break;
+
+                case CPUOpcodes.TXS:
+                    TXS();
+                    break;
+
+                case CPUOpcodes.TYA:
+                    TYA();
+                    break;
+
+                case CPUOpcodes.TRB_ZeroPage:
+                    NOP(instruction.mode);
+                    break;
+                case CPUOpcodes.TRB_Absolute:
+                    NOP(instruction.mode);
+                    break;
+
+                case CPUOpcodes.TSB_ZeroPage:
+                case CPUOpcodes.TSB_Absolute:
+                    TSB(instruction.mode);
+                    break;
+
+                default:
+                    throw new Exception($"Invalid instruction: {instruction.opcode:X2}({instruction.mnemonic})!");
+            }
+        }
+
+        private ICPUInstruction GetNextInstruction()
+        {
+            byte instruction = _memory.read(program_counter);
+            program_counter++;
+            CPUInstruction opcode = instruction_table.GetInstruction(instruction);
+            return opcode;
         }
 
         // SRE - Shift Right and XOR with Accumulator (Unofficial Opcode)
@@ -1494,21 +1510,7 @@ namespace NES_Emulator
             register_y = 0;
             status = CPUStatus.Initial;
             stack_pointer = STACK_RESET;
-            program_counter = _memory.readU16(0xFFFC);
-        }
-
-        public void load(byte[] Program)
-        {
-            _memory.load(Program);
-
-            // Default PC start
-            // _memory.writeU16(0xFFFC, 0x8000);
-
-            // Sneak game
-            //_memory.writeU16(0xFFFC, 0x0600);
-
-            // NES Test
-            _memory.writeU16(0xFFFC, 0xC000);
+            program_counter = _memory.readU16(PC_AT_POWER);
         }
 
         public void branch(bool condition)
@@ -1532,20 +1534,6 @@ namespace NES_Emulator
                 ushort displacement = (ushort)((high << 8) | low);
                 program_counter = (ushort)(program_counter + displacement + 2);
             }
-        }
-
-        public void loadAndRun(byte[] Program, OnUpdateCallBack callback)
-        {
-            load(Program);
-            reset();
-            Step(callback);
-        }
-
-        public void loadAndRun(byte[] Program)
-        {
-            load(Program);
-            reset();
-            Step();
         }
 
         public byte stackPop()
