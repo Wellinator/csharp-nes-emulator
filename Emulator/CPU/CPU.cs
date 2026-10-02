@@ -153,6 +153,17 @@ namespace NES_Emulator
                         SLO(opcode.mode);
                         break;
 
+                    // RLA
+                    case CPUOpcodes.RLA_ZeroPage:
+                    case CPUOpcodes.RLA_ZeroPage_X:
+                    case CPUOpcodes.RLA_Absolute:
+                    case CPUOpcodes.RLA_Absolute_X:
+                    case CPUOpcodes.RLA_Absolute_Y:
+                    case CPUOpcodes.RLA_Indirect_X:
+                    case CPUOpcodes.RLA_Indirect_Y:
+                        RLA(opcode.mode);
+                        break;
+
                     // ASR
                     case CPUOpcodes.ASR_Accumulator:
                     case CPUOpcodes.ASR_ZeroPage:
@@ -601,6 +612,20 @@ namespace NES_Emulator
 
             // ORA
             setRegisterAcc((byte)(register_acc | result));
+        }
+
+        // RLA - Rotate Left and AND with Accumulator
+        private void RLA(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+
+            // ROL
+            byte rotatedValue = rotateOneBitLeft(value);
+            _memory.write(addr, rotatedValue);
+
+            // AND
+            setRegisterAcc((byte)(register_acc & rotatedValue));
         }
 
         private void DCP(CPUAddressingMode mode)

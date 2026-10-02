@@ -162,6 +162,15 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.SLO_Indirect_X, new CPUInstruction { opcode = CPUOpcodes.SLO_Indirect_X, mnemonic = "SLO", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_X });
             lookupTable.Add(CPUOpcodes.SLO_Indirect_Y, new CPUInstruction { opcode = CPUOpcodes.SLO_Indirect_Y, mnemonic = "SLO", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_Y });
 
+            // RLA - Rotate Left and OR with Accumulator (Unofficial Opcode)
+            lookupTable.Add(CPUOpcodes.RLA_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.RLA_ZeroPage, mnemonic = "RLA", bytes = 2, cycles = 5, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.RLA_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.RLA_ZeroPage_X, mnemonic = "RLA", bytes = 2, cycles = 6, mode = CPUAddressingMode.ZeroPage_X });
+            lookupTable.Add(CPUOpcodes.RLA_Absolute, new CPUInstruction { opcode = CPUOpcodes.RLA_Absolute, mnemonic = "RLA", bytes = 3, cycles = 6, mode = CPUAddressingMode.Absolute });
+            lookupTable.Add(CPUOpcodes.RLA_Absolute_X, new CPUInstruction { opcode = CPUOpcodes.RLA_Absolute_X, mnemonic = "RLA", bytes = 3, cycles = 7, mode = CPUAddressingMode.Absolute_X });
+            lookupTable.Add(CPUOpcodes.RLA_Absolute_Y, new CPUInstruction { opcode = CPUOpcodes.RLA_Absolute_Y, mnemonic = "RLA", bytes = 3, cycles = 7, mode = CPUAddressingMode.Absolute_Y });
+            lookupTable.Add(CPUOpcodes.RLA_Indirect_X, new CPUInstruction { opcode = CPUOpcodes.RLA_Indirect_X, mnemonic = "RLA", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_X });
+            lookupTable.Add(CPUOpcodes.RLA_Indirect_Y, new CPUInstruction { opcode = CPUOpcodes.RLA_Indirect_Y, mnemonic = "RLA", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_Y });
+
             // DEX - Decrement X Register
             lookupTable.Add(CPUOpcodes.DEX, new CPUInstruction { opcode = CPUOpcodes.DEX, mnemonic = "DEX", bytes = 1, cycles = 2 });
 

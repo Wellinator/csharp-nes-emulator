@@ -168,6 +168,15 @@ namespace NES_Emulator
         public const byte SLO_Indirect_X = 0x03;
         public const byte SLO_Indirect_Y = 0x13;
 
+        // RLA - Rotate Left and OR with Accumulator
+        public const byte RLA_ZeroPage = 0x27;
+        public const byte RLA_ZeroPage_X = 0x37;
+        public const byte RLA_Absolute = 0x2F;
+        public const byte RLA_Absolute_X = 0x3F;
+        public const byte RLA_Absolute_Y = 0x3B;
+        public const byte RLA_Indirect_X = 0x23;
+        public const byte RLA_Indirect_Y = 0x33;
+
         // INX
         public const byte INX = 0xE8;
 
