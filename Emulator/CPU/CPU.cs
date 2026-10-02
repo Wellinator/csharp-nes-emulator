@@ -164,8 +164,18 @@ namespace NES_Emulator
                         RLA(opcode.mode);
                         break;
 
+                    // SRE
+                    case CPUOpcodes.SRE_ZeroPage:
+                    case CPUOpcodes.SRE_ZeroPage_X:
+                    case CPUOpcodes.SRE_Absolute:
+                    case CPUOpcodes.SRE_Absolute_X:
+                    case CPUOpcodes.SRE_Absolute_Y:
+                    case CPUOpcodes.SRE_Indirect_X:
+                    case CPUOpcodes.SRE_Indirect_Y:
+                        SRE(opcode.mode);
+                        break;
+
                     // ASR
-                    case CPUOpcodes.ASR_Accumulator:
                     case CPUOpcodes.ASR_ZeroPage:
                     case CPUOpcodes.ASR_ZeroPage_X:
                         ASR();
@@ -587,6 +597,30 @@ namespace NES_Emulator
                         throw new Exception($"Invalid instruction: {opcode.opcode:X2}({opcode.mnemonic})!");
                 }
             }
+        }
+
+        // SRE - Shift Right and XOR with Accumulator (Unofficial Opcode)
+        private void SRE(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+
+            // LSR
+            if ((value & CPUStatus.Carry) == 1)
+            {
+                setStatus(CPUStatus.Carry);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Carry);
+            }
+
+            byte rightShiftedValue = (byte)(value >> 1);
+            _memory.write(addr, rightShiftedValue);
+
+            // EOR
+            byte xoredValue = (byte)(register_acc ^ rightShiftedValue);
+            setRegisterAcc(xoredValue);
         }
 
         // SLO - Shift Left and OR with Accumulator

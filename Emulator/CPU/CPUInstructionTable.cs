@@ -171,6 +171,15 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.RLA_Indirect_X, new CPUInstruction { opcode = CPUOpcodes.RLA_Indirect_X, mnemonic = "RLA", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_X });
             lookupTable.Add(CPUOpcodes.RLA_Indirect_Y, new CPUInstruction { opcode = CPUOpcodes.RLA_Indirect_Y, mnemonic = "RLA", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_Y });
 
+            // SRE - Shift Right and EOR with Accumulator (Unofficial Opcode)
+            lookupTable.Add(CPUOpcodes.SRE_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.SRE_ZeroPage, mnemonic = "SRE", bytes = 2, cycles = 5, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.SRE_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.SRE_ZeroPage_X, mnemonic = "SRE", bytes = 2, cycles = 6, mode = CPUAddressingMode.ZeroPage_X });
+            lookupTable.Add(CPUOpcodes.SRE_Absolute, new CPUInstruction { opcode = CPUOpcodes.SRE_Absolute, mnemonic = "SRE", bytes = 3, cycles = 6, mode = CPUAddressingMode.Absolute });
+            lookupTable.Add(CPUOpcodes.SRE_Absolute_X, new CPUInstruction { opcode = CPUOpcodes.SRE_Absolute_X, mnemonic = "SRE", bytes = 3, cycles = 7, mode = CPUAddressingMode.Absolute_X });
+            lookupTable.Add(CPUOpcodes.SRE_Absolute_Y, new CPUInstruction { opcode = CPUOpcodes.SRE_Absolute_Y, mnemonic = "SRE", bytes = 3, cycles = 7, mode = CPUAddressingMode.Absolute_Y });
+            lookupTable.Add(CPUOpcodes.SRE_Indirect_X, new CPUInstruction { opcode = CPUOpcodes.SRE_Indirect_X, mnemonic = "SRE", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_X });
+            lookupTable.Add(CPUOpcodes.SRE_Indirect_Y, new CPUInstruction { opcode = CPUOpcodes.SRE_Indirect_Y, mnemonic = "SRE", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_Y });
+
             // DEX - Decrement X Register
             lookupTable.Add(CPUOpcodes.DEX, new CPUInstruction { opcode = CPUOpcodes.DEX, mnemonic = "DEX", bytes = 1, cycles = 2 });
 
@@ -247,7 +256,6 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.LSR_Absolute_X, new CPUInstruction { opcode = CPUOpcodes.LSR_Absolute_X, mnemonic = "LSR", bytes = 3, cycles = 7, mode = CPUAddressingMode.Absolute_X });
 
             // ASR - Arithmetic Shift Right
-            lookupTable.Add(CPUOpcodes.ASR_Accumulator, new CPUInstruction { opcode = CPUOpcodes.ASR_Accumulator, mnemonic = "ASR", bytes = 1, cycles = 1, mode = CPUAddressingMode.Accumulator });
             lookupTable.Add(CPUOpcodes.ASR_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.ASR_ZeroPage, mnemonic = "ASR", bytes = 2, cycles = 2, mode = CPUAddressingMode.ZeroPage });
             lookupTable.Add(CPUOpcodes.ASR_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.ASR_ZeroPage_X, mnemonic = "ASR", bytes = 2, cycles = 2, mode = CPUAddressingMode.ZeroPage_X });
 

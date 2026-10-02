@@ -31,7 +31,6 @@ namespace NES_Emulator
         public const byte ASL_Absolute_X = 0x1E;
 
         // ASR
-        public const byte ASR_Accumulator = 0x43;
         public const byte ASR_ZeroPage = 0x44;
         public const byte ASR_ZeroPage_X = 0x54;
 
@@ -176,6 +175,15 @@ namespace NES_Emulator
         public const byte RLA_Absolute_Y = 0x3B;
         public const byte RLA_Indirect_X = 0x23;
         public const byte RLA_Indirect_Y = 0x33;
+
+        // SRE - Shift Right and EOR with Accumulator
+        public const byte SRE_ZeroPage = 0x47;
+        public const byte SRE_ZeroPage_X = 0x57;
+        public const byte SRE_Absolute = 0x4F;
+        public const byte SRE_Absolute_X = 0x5F;
+        public const byte SRE_Absolute_Y = 0x5B;
+        public const byte SRE_Indirect_X = 0x43;
+        public const byte SRE_Indirect_Y = 0x53;
 
         // INX
         public const byte INX = 0xE8;
