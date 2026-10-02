@@ -150,6 +150,15 @@ namespace NES_Emulator
         public const byte INC_Absolute = 0xEE;
         public const byte INC_Absolute_X = 0xFE;
 
+        // ISC
+        public const byte ISC_ZeroPage = 0xE7;
+        public const byte ISC_ZeroPage_X = 0xF7;
+        public const byte ISC_Absolute = 0xEF;
+        public const byte ISC_Absolute_X = 0xFF;
+        public const byte ISC_Absolute_Y = 0xFB;
+        public const byte ISC_Indirect_X = 0xE3;
+        public const byte ISC_Indirect_Y = 0xF3;
+
         // INX
         public const byte INX = 0xE8;
 
@@ -274,7 +283,7 @@ namespace NES_Emulator
         public const byte SBC_Absolute_Y = 0xF9;
         public const byte SBC_Indirect_X = 0xE1;
         public const byte SBC_Indirect_Y = 0xF1;
-        
+
         // USBC
         public const byte USBC_Immediate = 0xEB;
 

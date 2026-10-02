@@ -294,6 +294,17 @@ namespace NES_Emulator
                         INC(opcode.mode);
                         break;
 
+                    // ISC
+                    case CPUOpcodes.ISC_ZeroPage:
+                    case CPUOpcodes.ISC_ZeroPage_X:
+                    case CPUOpcodes.ISC_Absolute:
+                    case CPUOpcodes.ISC_Absolute_X:
+                    case CPUOpcodes.ISC_Absolute_Y:
+                    case CPUOpcodes.ISC_Indirect_X:
+                    case CPUOpcodes.ISC_Indirect_Y:
+                        ISC(opcode.mode);
+                        break;
+
                     case CPUOpcodes.INX:
                         INX();
                         break;
@@ -817,6 +828,15 @@ namespace NES_Emulator
             byte incValue = (byte)(_memory.read(addr) + 1);
             _memory.write(addr, incValue);
             updateZeroAndNegativeFlags(incValue);
+        }
+
+        private void ISC(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+            byte incrementedValue = (byte)(value + 1);
+            _memory.write(addr, incrementedValue);
+            addToRegisterA((byte)~incrementedValue);
         }
 
         private void INX()

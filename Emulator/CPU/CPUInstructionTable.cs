@@ -144,6 +144,15 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.DCP_Indirect_X, new CPUInstruction { opcode = CPUOpcodes.DCP_Indirect_X, mnemonic = "DCP", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_X });
             lookupTable.Add(CPUOpcodes.DCP_Indirect_Y, new CPUInstruction { opcode = CPUOpcodes.DCP_Indirect_Y, mnemonic = "DCP", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_Y });
 
+            // ISC - Increment Memory and Compare (Unofficial Opcode)
+            lookupTable.Add(CPUOpcodes.ISC_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.ISC_ZeroPage, mnemonic = "ISC", bytes = 2, cycles = 5, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.ISC_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.ISC_ZeroPage_X, mnemonic = "ISC", bytes = 2, cycles = 6, mode = CPUAddressingMode.ZeroPage_X });
+            lookupTable.Add(CPUOpcodes.ISC_Absolute, new CPUInstruction { opcode = CPUOpcodes.ISC_Absolute, mnemonic = "ISC", bytes = 3, cycles = 6, mode = CPUAddressingMode.Absolute });
+            lookupTable.Add(CPUOpcodes.ISC_Absolute_X, new CPUInstruction { opcode = CPUOpcodes.ISC_Absolute_X, mnemonic = "ISC", bytes = 3, cycles = 7, mode = CPUAddressingMode.Absolute_X });
+            lookupTable.Add(CPUOpcodes.ISC_Absolute_Y, new CPUInstruction { opcode = CPUOpcodes.ISC_Absolute_Y, mnemonic = "ISC", bytes = 3, cycles = 7, mode = CPUAddressingMode.Absolute_Y });
+            lookupTable.Add(CPUOpcodes.ISC_Indirect_X, new CPUInstruction { opcode = CPUOpcodes.ISC_Indirect_X, mnemonic = "ISC", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_X });
+            lookupTable.Add(CPUOpcodes.ISC_Indirect_Y, new CPUInstruction { opcode = CPUOpcodes.ISC_Indirect_Y, mnemonic = "ISC", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_Y });
+
             // DEX - Decrement X Register
             lookupTable.Add(CPUOpcodes.DEX, new CPUInstruction { opcode = CPUOpcodes.DEX, mnemonic = "DEX", bytes = 1, cycles = 2 });
 
