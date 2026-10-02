@@ -118,6 +118,15 @@ namespace NES_Emulator
         public const byte DEC_Absolute = 0xCE;
         public const byte DEC_Absolute_X = 0xDE;
 
+        // DCP
+        public const byte DCP_ZeroPage = 0xC7;
+        public const byte DCP_ZeroPage_X = 0xD7;
+        public const byte DCP_Absolute = 0xCF;
+        public const byte DCP_Absolute_X = 0xDF;
+        public const byte DCP_Absolute_Y = 0xDB;
+        public const byte DCP_Indirect_X = 0xC3;
+        public const byte DCP_Indirect_Y = 0xD3;
+
         // DEX
         public const byte DEX = 0xCA;
 

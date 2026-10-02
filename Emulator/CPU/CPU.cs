@@ -252,6 +252,17 @@ namespace NES_Emulator
                         DEC(opcode.mode);
                         break;
 
+                    // DCP
+                    case CPUOpcodes.DCP_ZeroPage:
+                    case CPUOpcodes.DCP_ZeroPage_X:
+                    case CPUOpcodes.DCP_Absolute:
+                    case CPUOpcodes.DCP_Absolute_X:
+                    case CPUOpcodes.DCP_Absolute_Y:
+                    case CPUOpcodes.DCP_Indirect_X:
+                    case CPUOpcodes.DCP_Indirect_Y:
+                        DCP(opcode.mode);
+                        break;
+
                     case CPUOpcodes.DEX:
                         DEX();
                         break;
@@ -545,6 +556,15 @@ namespace NES_Emulator
             }
         }
 
+        private void DCP(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+            byte decrementedValue = (byte)(value - 1);
+            _memory.write(addr, decrementedValue);
+            CompareByValue(decrementedValue, register_acc);
+        }
+
         private void NOP(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
@@ -720,23 +740,28 @@ namespace NES_Emulator
 
         private void CMP(CPUAddressingMode mode)
         {
-            compare(mode, register_acc);
+            CompareByAddress(mode, register_acc);
         }
 
         private void CPX(CPUAddressingMode mode)
         {
-            compare(mode, register_x);
+            CompareByAddress(mode, register_x);
         }
 
         private void CPY(CPUAddressingMode mode)
         {
-            compare(mode, register_y);
+            CompareByAddress(mode, register_y);
         }
 
-        private void compare(CPUAddressingMode mode, byte reg)
+        private void CompareByAddress(CPUAddressingMode mode, byte reg)
         {
             ushort addr = getAddressByMode(mode);
             byte value = _memory.read(addr);
+            CompareByValue(value, reg);
+        }
+
+        private void CompareByValue(byte value, byte reg)
+        {
             byte result = (byte)(reg - value);
 
             if (value <= reg)
