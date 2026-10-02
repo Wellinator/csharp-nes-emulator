@@ -265,6 +265,9 @@ namespace NES_Emulator
         public const byte SBC_Absolute_Y = 0xF9;
         public const byte SBC_Indirect_X = 0xE1;
         public const byte SBC_Indirect_Y = 0xF1;
+        
+        // USBC
+        public const byte USBC_Immediate = 0xEB;
 
         // SEC
         public const byte SEC = 0x38;

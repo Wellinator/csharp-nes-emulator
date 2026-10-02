@@ -288,6 +288,9 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.SBC_Indirect_X, new CPUInstruction { opcode = CPUOpcodes.SBC_Indirect_X, mnemonic = "SBC", bytes = 2, cycles = 6, mode = CPUAddressingMode.Indirect_X });
             lookupTable.Add(CPUOpcodes.SBC_Indirect_Y, new CPUInstruction { opcode = CPUOpcodes.SBC_Indirect_Y, mnemonic = "SBC", bytes = 2, cycles = 5,/*(+1 if page crossed)*/ mode = CPUAddressingMode.Indirect_Y });
 
+            // SBC - Subtract with Carry (Unofficial Opcode)
+            lookupTable.Add(CPUOpcodes.USBC_Immediate, new CPUInstruction { opcode = CPUOpcodes.USBC_Immediate, mnemonic = "SBC", bytes = 2, cycles = 2, mode = CPUAddressingMode.Immediate });
+
             // SEC - Set Carry Flag
             lookupTable.Add(CPUOpcodes.SEC, new CPUInstruction { opcode = CPUOpcodes.SEC, mnemonic = "SEC", bytes = 1, cycles = 2 });
 

@@ -312,7 +312,7 @@ namespace NES_Emulator
                     case CPUOpcodes.LDA_Indirect_Y:
                         LDA(opcode.mode);
                         break;
-                    
+
                     // LAX
                     case CPUOpcodes.LAX_ZeroPage:
                     case CPUOpcodes.LAX_ZeroPage_Y:
@@ -450,6 +450,8 @@ namespace NES_Emulator
                     case CPUOpcodes.SBC_Absolute_Y:
                     case CPUOpcodes.SBC_Indirect_X:
                     case CPUOpcodes.SBC_Indirect_Y:
+                    // USBC - Unofficial Opcode
+                    case CPUOpcodes.USBC_Immediate:
                         SBC(opcode.mode);
                         break;
 
