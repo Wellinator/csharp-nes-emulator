@@ -90,7 +90,7 @@ public class CPUTests
         uut.reset();
         uut.register_acc = 10;
 
-        uut.run();
+        uut.Step();
 
         Assert.Equal(10, uut.register_x);
     }
@@ -113,7 +113,7 @@ public class CPUTests
         uut.reset();
         uut.register_x = 0xFF;
 
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0x01, uut.register_x);
     }
@@ -137,7 +137,7 @@ public class CPUTests
         uut.reset();
         uut.setStatus(CPUStatus.Carry);
 
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0x00, uut.status & CPUStatus.Carry);
     }
@@ -263,7 +263,7 @@ public class CPUTests
         uut.reset();
 
         uut.setStatus(CPUStatus.Carry);
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0x00, uut.register_acc);
     }
@@ -278,7 +278,7 @@ public class CPUTests
         uut.reset();
 
         uut.setStatus(CPUStatus.Carry);
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0x05, uut.register_acc);
     }
@@ -305,7 +305,7 @@ public class CPUTests
         uut.reset();
 
         uut.setStatus(CPUStatus.Zero);
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0x05, uut.register_acc);
     }
@@ -354,7 +354,7 @@ public class CPUTests
         uut.reset();
 
         uut.setStatus(CPUStatus.Negative);
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0x05, uut.register_acc);
     }
@@ -391,7 +391,7 @@ public class CPUTests
         uut.reset();
 
         uut.setStatus(CPUStatus.Zero);
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0x00, uut.register_acc);
     }
@@ -417,7 +417,7 @@ public class CPUTests
         uut.reset();
 
         uut.setStatus(CPUStatus.Negative);
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0x00, uut.register_acc);
     }
@@ -443,7 +443,7 @@ public class CPUTests
         uut.reset();
 
         uut.setStatus(CPUStatus.Overflow);
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0x00, uut.register_acc);
     }
@@ -458,7 +458,7 @@ public class CPUTests
         uut.reset();
 
         uut.setStatus(CPUStatus.Overflow);
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0x05, uut.register_acc);
     }
@@ -482,7 +482,7 @@ public class CPUTests
         uut.load(data);
         uut.reset();
         uut.setStatus(CPUStatus.Decimal);
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0x00, uut.status & CPUStatus.Decimal);
     }
@@ -495,7 +495,7 @@ public class CPUTests
         uut.reset();
 
         uut.setStatus(CPUStatus.Interrupt);
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0x00, uut.status & CPUStatus.Interrupt);
     }
@@ -508,7 +508,7 @@ public class CPUTests
         uut.reset();
 
         uut.setStatus(CPUStatus.Overflow);
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0x00, uut.status & CPUStatus.Overflow);
     }
@@ -605,7 +605,7 @@ public class CPUTests
         uut.reset();
         uut.register_x = 2;
 
-        uut.run();
+        uut.Step();
 
         Assert.Equal(1, uut.register_x);
     }
@@ -618,7 +618,7 @@ public class CPUTests
         uut.reset();
         uut.register_x = 0;
 
-        uut.run();
+        uut.Step();
 
         Assert.Equal(255, uut.register_x);
     }
@@ -631,7 +631,7 @@ public class CPUTests
         uut.reset();
         uut.register_y = 2;
 
-        uut.run();
+        uut.Step();
 
         Assert.Equal(1, uut.register_y);
     }
@@ -644,7 +644,7 @@ public class CPUTests
         uut.reset();
         uut.register_y = 0;
 
-        uut.run();
+        uut.Step();
 
         Assert.Equal(255, uut.register_y);
     }
@@ -691,7 +691,7 @@ public class CPUTests
         uut.reset();
         uut.register_x = 1;
 
-        uut.run();
+        uut.Step();
 
         Assert.Equal(2, uut.register_x);
     }
@@ -704,7 +704,7 @@ public class CPUTests
         uut.reset();
         uut.register_x = 255;
 
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0, uut.register_x);
     }
@@ -717,7 +717,7 @@ public class CPUTests
         uut.reset();
         uut.register_y = 1;
 
-        uut.run();
+        uut.Step();
 
         Assert.Equal(2, uut.register_y);
     }
@@ -730,7 +730,7 @@ public class CPUTests
         uut.reset();
         uut.register_y = 255;
 
-        uut.run();
+        uut.Step();
 
         Assert.Equal(0, uut.register_y);
     }

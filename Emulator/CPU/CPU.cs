@@ -14,7 +14,7 @@ namespace NES_Emulator
         public ushort program_counter { get; set; }
         public long Cycles { get; set; }
         public CPUInstructionTable instruction_table { get; set; }
-        public void run(OnUpdateCallBack? callback);
+        public void Step(OnUpdateCallBack? callback);
         public byte setStatus(in byte Status);
         public void reset();
         public void load(byte[] Program);
@@ -68,7 +68,7 @@ namespace NES_Emulator
         private const byte STACK_RESET = 0xFD;
         private const ushort PC_AT_POWER = 0xFFFC;
 
-        public void run(OnUpdateCallBack? callback = null)
+        public void Step(OnUpdateCallBack? callback = null)
         {
             while (true)
             {
@@ -1538,14 +1538,14 @@ namespace NES_Emulator
         {
             load(Program);
             reset();
-            run(callback);
+            Step(callback);
         }
 
         public void loadAndRun(byte[] Program)
         {
             load(Program);
             reset();
-            run();
+            Step();
         }
 
         public byte stackPop()
