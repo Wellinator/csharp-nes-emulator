@@ -171,6 +171,15 @@ namespace NES_Emulator
             lookupTable.Add(CPUOpcodes.RLA_Indirect_X, new CPUInstruction { opcode = CPUOpcodes.RLA_Indirect_X, mnemonic = "RLA", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_X });
             lookupTable.Add(CPUOpcodes.RLA_Indirect_Y, new CPUInstruction { opcode = CPUOpcodes.RLA_Indirect_Y, mnemonic = "RLA", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_Y });
 
+            // RRA - Rotate Right and ADD to Accumulator (Unofficial Opcode)
+            lookupTable.Add(CPUOpcodes.RRA_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.RRA_ZeroPage, mnemonic = "RRA", bytes = 2, cycles = 5, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.RRA_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.RRA_ZeroPage_X, mnemonic = "RRA", bytes = 2, cycles = 6, mode = CPUAddressingMode.ZeroPage_X });
+            lookupTable.Add(CPUOpcodes.RRA_Absolute, new CPUInstruction { opcode = CPUOpcodes.RRA_Absolute, mnemonic = "RRA", bytes = 3, cycles = 6, mode = CPUAddressingMode.Absolute });
+            lookupTable.Add(CPUOpcodes.RRA_Absolute_X, new CPUInstruction { opcode = CPUOpcodes.RRA_Absolute_X, mnemonic = "RRA", bytes = 3, cycles = 7, mode = CPUAddressingMode.Absolute_X });
+            lookupTable.Add(CPUOpcodes.RRA_Absolute_Y, new CPUInstruction { opcode = CPUOpcodes.RRA_Absolute_Y, mnemonic = "RRA", bytes = 3, cycles = 7, mode = CPUAddressingMode.Absolute_Y });
+            lookupTable.Add(CPUOpcodes.RRA_Indirect_X, new CPUInstruction { opcode = CPUOpcodes.RRA_Indirect_X, mnemonic = "RRA", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_X });
+            lookupTable.Add(CPUOpcodes.RRA_Indirect_Y, new CPUInstruction { opcode = CPUOpcodes.RRA_Indirect_Y, mnemonic = "RRA", bytes = 2, cycles = 8, mode = CPUAddressingMode.Indirect_Y });
+
             // SRE - Shift Right and EOR with Accumulator (Unofficial Opcode)
             lookupTable.Add(CPUOpcodes.SRE_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.SRE_ZeroPage, mnemonic = "SRE", bytes = 2, cycles = 5, mode = CPUAddressingMode.ZeroPage });
             lookupTable.Add(CPUOpcodes.SRE_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.SRE_ZeroPage_X, mnemonic = "SRE", bytes = 2, cycles = 6, mode = CPUAddressingMode.ZeroPage_X });

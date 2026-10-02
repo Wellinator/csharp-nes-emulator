@@ -164,6 +164,17 @@ namespace NES_Emulator
                         RLA(opcode.mode);
                         break;
 
+                    // RRA
+                    case CPUOpcodes.RRA_ZeroPage:
+                    case CPUOpcodes.RRA_ZeroPage_X:
+                    case CPUOpcodes.RRA_Absolute:
+                    case CPUOpcodes.RRA_Absolute_X:
+                    case CPUOpcodes.RRA_Absolute_Y:
+                    case CPUOpcodes.RRA_Indirect_X:
+                    case CPUOpcodes.RRA_Indirect_Y:
+                        RRA(opcode.mode);
+                        break;
+
                     // SRE
                     case CPUOpcodes.SRE_ZeroPage:
                     case CPUOpcodes.SRE_ZeroPage_X:
@@ -660,6 +671,20 @@ namespace NES_Emulator
 
             // AND
             setRegisterAcc((byte)(register_acc & rotatedValue));
+        }
+
+        // RRA - Rotate Right and ADD to Accumulator
+        private void RRA(CPUAddressingMode mode)
+        {
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+
+            // ROR
+            byte rotatedValue = rotateOneBitRight(value);
+            _memory.write(addr, rotatedValue);
+
+            // ADC
+            addToRegisterA(rotatedValue);
         }
 
         private void DCP(CPUAddressingMode mode)

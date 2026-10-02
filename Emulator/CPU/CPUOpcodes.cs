@@ -176,6 +176,15 @@ namespace NES_Emulator
         public const byte RLA_Indirect_X = 0x23;
         public const byte RLA_Indirect_Y = 0x33;
 
+        // RRA - Rotate Right and ADD to Accumulator
+        public const byte RRA_ZeroPage = 0x67;
+        public const byte RRA_ZeroPage_X = 0x77;
+        public const byte RRA_Absolute = 0x6F;
+        public const byte RRA_Absolute_X = 0x7F;
+        public const byte RRA_Absolute_Y = 0x7B;
+        public const byte RRA_Indirect_X = 0x63;
+        public const byte RRA_Indirect_Y = 0x73;
+
         // SRE - Shift Right and EOR with Accumulator
         public const byte SRE_ZeroPage = 0x47;
         public const byte SRE_ZeroPage_X = 0x57;
