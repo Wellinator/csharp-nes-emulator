@@ -12,7 +12,7 @@ namespace NES_Emulator
         public byte status { get; set; }
         public byte stack_pointer { get; set; }
         public ushort program_counter { get; set; }
-        public long cycles { get; set; }
+        public long Cycles { get; set; }
         public CPUInstructionTable instruction_table { get; set; }
         public void run(OnUpdateCallBack? callback);
         public byte setStatus(in byte Status);
@@ -49,7 +49,7 @@ namespace NES_Emulator
             register_x = 0;
             status = CPUStatus.Initial;
             program_counter = PC_AT_POWER;
-            cycles = 1;
+            Cycles = 1;
             instruction_table = new CPUInstructionTable();
             stack_pointer = STACK_RESET;
         }
@@ -60,7 +60,7 @@ namespace NES_Emulator
         public byte status { get; set; }
         public byte stack_pointer { get; set; }
         public ushort program_counter { get; set; }
-        public long cycles { get; set; }
+        public long Cycles { get; set; }
         public iMemory _memory { get; set; }
         public CPUInstructionTable instruction_table { get; set; }
 
@@ -79,7 +79,7 @@ namespace NES_Emulator
                 program_counter++;
 
                 CPUInstruction opcode = instruction_table.GetInstruction(instruction);
-                int _cycle = opcode.cycles;
+                int _cycle = opcode.BaseCycles;
 
                 if (instruction == CPUOpcodes.BRK)
                 {
@@ -100,9 +100,9 @@ namespace NES_Emulator
                 var mnemonicPlusAddr = $"{opcode.mnemonic} ${String.Join("", data.ToArray().Reverse())}".PadRight(32);
                 // DEBUG LOG CONTENT END
 
-                cycles += opcode.cycles;
+                Cycles += opcode.BaseCycles;
 
-                Console.WriteLine($"{pc_for_log:X4}  {opcodePlusData} {mnemonicPlusAddr} A:{register_acc:X2} X:{register_x:X2} Y:{register_y:X2} P:{status:X2} SP:{stack_pointer:X2} CYC: {cycles}");
+                Console.WriteLine($"{pc_for_log:X4}  {opcodePlusData} {mnemonicPlusAddr} A:{register_acc:X2} X:{register_x:X2} Y:{register_y:X2} P:{status:X2} SP:{stack_pointer:X2} CYC: {Cycles}");
 
                 switch (instruction)
                 {
