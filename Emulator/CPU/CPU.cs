@@ -142,6 +142,17 @@ namespace NES_Emulator
                         ASL(opcode.mode);
                         break;
 
+                    // SLO
+                    case CPUOpcodes.SLO_ZeroPage:
+                    case CPUOpcodes.SLO_ZeroPage_X:
+                    case CPUOpcodes.SLO_Absolute:
+                    case CPUOpcodes.SLO_Absolute_X:
+                    case CPUOpcodes.SLO_Absolute_Y:
+                    case CPUOpcodes.SLO_Indirect_X:
+                    case CPUOpcodes.SLO_Indirect_Y:
+                        SLO(opcode.mode);
+                        break;
+
                     // ASR
                     case CPUOpcodes.ASR_Accumulator:
                     case CPUOpcodes.ASR_ZeroPage:
@@ -565,6 +576,31 @@ namespace NES_Emulator
                         throw new Exception($"Invalid instruction: {opcode.opcode:X2}({opcode.mnemonic})!");
                 }
             }
+        }
+
+        // SLO - Shift Left and OR with Accumulator
+        private void SLO(CPUAddressingMode mode)
+        {
+
+            ushort addr = getAddressByMode(mode);
+            byte value = _memory.read(addr);
+
+            // ASL
+            bool is7thBitSet = (value >> 7) == 1;
+            if (is7thBitSet)
+            {
+                setStatus(CPUStatus.Carry);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Carry);
+            }
+
+            byte result = (byte)(value << 1);
+            _memory.write(addr, result);
+
+            // ORA
+            setRegisterAcc((byte)(register_acc | result));
         }
 
         private void DCP(CPUAddressingMode mode)

@@ -159,6 +159,15 @@ namespace NES_Emulator
         public const byte ISC_Indirect_X = 0xE3;
         public const byte ISC_Indirect_Y = 0xF3;
 
+        // SLO - Shift Left and OR with Accumulator
+        public const byte SLO_ZeroPage = 0x07;
+        public const byte SLO_ZeroPage_X = 0x17;
+        public const byte SLO_Absolute = 0x0F;
+        public const byte SLO_Absolute_X = 0x1F;
+        public const byte SLO_Absolute_Y = 0x1B;
+        public const byte SLO_Indirect_X = 0x03;
+        public const byte SLO_Indirect_Y = 0x13;
+
         // INX
         public const byte INX = 0xE8;
 
