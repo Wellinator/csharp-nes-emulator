@@ -79,15 +79,6 @@ namespace NES_Emulator
 
             ICPUInstruction instruction = GetNextInstruction();
 
-            // Run the instruction
-            ExecuteInstruction(instruction);
-
-            // Cycle control
-            long totalCycles = instruction.BaseCycles + ExtraCycles;
-            Cycles += totalCycles;
-
-
-
             // DEBUG LOG CONTENT INIT
             List<string> data = new List<string>();
             if (instruction.bytes > 1)
@@ -102,6 +93,13 @@ namespace NES_Emulator
             var mnemonicPlusAddr = $"{instruction.mnemonic} ${String.Join("", data.ToArray().Reverse())}".PadRight(32);
             Console.WriteLine($"{pc_for_log:X4}  {opcodePlusData} {mnemonicPlusAddr} A:{register_acc:X2} X:{register_x:X2} Y:{register_y:X2} P:{status:X2} SP:{stack_pointer:X2} CYC: {Cycles}");
             // DEBUG LOG CONTENT END
+
+            // Run the instruction
+            ExecuteInstruction(instruction);
+
+            // Cycle control
+            long totalCycles = instruction.BaseCycles + ExtraCycles;
+            Cycles += totalCycles;
 
             return totalCycles;
         }
@@ -1511,6 +1509,7 @@ namespace NES_Emulator
             status = CPUStatus.Initial;
             stack_pointer = STACK_RESET;
             program_counter = _memory.readU16(PC_AT_POWER);
+            Cycles = 7; // Initial cycle value due to reset sequence cost
         }
 
         public void branch(bool condition)
