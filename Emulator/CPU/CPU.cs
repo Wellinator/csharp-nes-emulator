@@ -1045,7 +1045,17 @@ namespace NES_Emulator
         {
             byte shiftedValue = (byte)(Value << 1);
             byte result = (byte)(shiftedValue | (status & CPUStatus.Carry));
-            setStatus((byte)(CPUStatus.Carry & (Value >> 7)));
+
+            bool is7thBitSet = (Value >> 7) == 1;
+            if (is7thBitSet)
+            {
+                setStatus(CPUStatus.Carry);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Carry);
+            }
+
             updateZeroAndNegativeFlags(result);
             return result;
         }
@@ -1067,9 +1077,18 @@ namespace NES_Emulator
         {
             byte shiftedValue = (byte)(Value >> 1);
             byte result = (byte)(shiftedValue | ((status & CPUStatus.Carry) << 7));
-            setStatus((byte)(CPUStatus.Carry & Value));
-            updateZeroAndNegativeFlags(result);
 
+            bool is0thBitSet = (Value & 0x01) == 1;
+            if (is0thBitSet)
+            {
+                setStatus(CPUStatus.Carry);
+            }
+            else
+            {
+                removeStatus(CPUStatus.Carry);
+            }
+
+            updateZeroAndNegativeFlags(result);
             return result;
         }
 
