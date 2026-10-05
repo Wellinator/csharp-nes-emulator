@@ -30,9 +30,6 @@ namespace NES_Emulator
         public const byte ASL_Absolute = 0x0E;
         public const byte ASL_Absolute_X = 0x1E;
 
-        // ASR
-        public const byte ASR_ZeroPage = 0x44;
-        public const byte ASR_ZeroPage_X = 0x54;
 
 
         // BCC
@@ -47,9 +44,7 @@ namespace NES_Emulator
         // BIT
         public const byte BIT_Immediate = 0x89;
         public const byte BIT_Absolute = 0x2C;
-        public const byte BIT_Absolute_X = 0x3C;
         public const byte BIT_ZeroPage = 0x24;
-        public const byte BIT_ZeroPage_X = 0x34;
 
         // BMI
         public const byte BMI_Relative = 0x30;
@@ -111,7 +106,6 @@ namespace NES_Emulator
         public const byte CPY_Absolute = 0xCC;
 
         // DEC - Decrement Memory By One
-        public const byte DEC_Accumulator = 0x3A;
         public const byte DEC_ZeroPage = 0xC6;
         public const byte DEC_ZeroPage_X = 0xD6;
         public const byte DEC_Absolute = 0xCE;
@@ -143,7 +137,7 @@ namespace NES_Emulator
         public const byte EOR_Indirect_Y = 0x51;
 
         // INC
-        public const byte INC_Accumulator = 0x1A;
+        public const byte NOP_Unofficial_1A = 0x1A;
         public const byte INC_ZeroPage = 0xE6;
         public const byte INC_ZeroPage_X = 0xF6;
         public const byte INC_Absolute = 0xEE;
@@ -248,6 +242,19 @@ namespace NES_Emulator
 
         // NOP
         public const byte NOP = 0xEA;
+        public const byte NOP_Unofficial_0C = 0x0C;
+        public const byte NOP_Unofficial_3A = 0x3A;
+        public const byte NOP_Unofficial_5A = 0x5A;
+        public const byte NOP_Unofficial_7A = 0x7A;
+        public const byte NOP_Unofficial_DA = 0xDA;
+        public const byte NOP_Unofficial_FA = 0xFA;
+        public const byte NOP_Unofficial_14 = 0x14;
+        public const byte NOP_Unofficial_1C = 0x1C;
+        public const byte NOP_Unofficial_3C = 0x3C;
+        public const byte NOP_Unofficial_34 = 0x34;
+        public const byte NOP_Unofficial_04 = 0x04;
+        public const byte NOP_Unofficial_44 = 0x44;
+        public const byte NOP_Unofficial_54 = 0x54;
         public const byte NOP_Unofficial_F4 = 0xF4;
         public const byte NOP_Unofficial_D4 = 0xD4;
         public const byte NOP_Unofficial_5C = 0x5C;
@@ -268,23 +275,11 @@ namespace NES_Emulator
         // PHA
         public const byte PHA = 0x48;
 
-        // PHY - Push Index Register Y On Stack
-        public const byte PHY = 0x5A;
-
-        // PHX - Push Index Register X On Stack
-        public const byte PHX = 0xDA;
-
         // PHP
         public const byte PHP = 0x08;
 
         // PLA
         public const byte PLA = 0x68;
-
-        // PLY - Pull Index Register Y From Stack
-        public const byte PLY = 0x7A;
-
-        // PLX - Pull Index Register X From Stack
-        public const byte PLX = 0xFA;
 
         // PLP
         public const byte PLP = 0x28;
@@ -373,13 +368,5 @@ namespace NES_Emulator
 
         // TYA
         public const byte TYA = 0x98;
-
-        // TRB
-        public const byte TRB_ZeroPage = 0x14;
-        public const byte TRB_Absolute = 0x1C;
-
-        // TSB
-        public const byte TSB_ZeroPage = 0x04;
-        public const byte TSB_Absolute = 0x0C;
     }
 }
