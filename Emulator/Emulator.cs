@@ -3,31 +3,29 @@ namespace NES_Emulator
     public class Emulator
     {
 
-        public readonly iMemory _mem;
+        public readonly IBusDevice _bus;
         public readonly iCPU _cpu;
+        public readonly ICartridge _cartridge;
+        public readonly IRam _ram = new Ram();
+        public readonly IPPU _ppu = new PPU();
 
         public Emulator()
         {
-            _mem = new Memory();
-            _cpu = new CPU(_mem);
+            _cartridge = new Cartridge();
+            _ram = new Ram();
+            _ppu = new PPU();
+            _bus = new Bus(_ram, _ppu, _cartridge);
+            _cpu = new CPU(_bus);
         }
 
         public void Run(byte[] program, OnUpdateCallBack callback)
         {
-            // Load program into memory
-            _mem.load(program);
-
-            // Default PC start
-            // _mem.writeU16(PC_AT_POWER, 0x8000);
-
-            // Sneak game
-            //_mem.writeU16(PC_AT_POWER, 0x0600);
-
-            // NES Test
-            _mem.writeU16(0xFFFC, 0xC000);
+            // Load the program into the cartridge
+            _cartridge.LoadRawBinary(program);
 
             // Reset CPU to initial state
-            _cpu.reset();
+            _cpu.Reset();
+            _cpu.program_counter = 0xC000;
 
             while (true)
             {

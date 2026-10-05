@@ -6,7 +6,6 @@ namespace NES_Emulator
 
     public interface iCPU
     {
-        public iMemory _memory { get; set; }
         public byte register_acc { get; set; }
         public byte register_x { get; set; }
         public byte status { get; set; }
@@ -17,15 +16,32 @@ namespace NES_Emulator
         public CPUInstructionTable instruction_table { get; set; }
         public long Step(OnUpdateCallBack? callback);
         public byte setStatus(in byte Status);
-        public void reset();
+        public void Reset();
     }
 
 
     public class CPU : iCPU
     {
+        private IBusDevice _bus { get; set; }
+        public byte register_acc { get; set; }
+        public byte register_x { get; set; }
+        public byte register_y { get; set; }
+        public byte status { get; set; }
+        public byte stack_pointer { get; set; }
+        public ushort program_counter { get; set; }
+        public long Cycles { get; set; }
+        public long ExtraCycles { get; set; }
+        public CPUInstructionTable instruction_table { get; set; }
 
-        public CPU(iMemory Memory)
+        private const ushort STACK_START_ADDR = 0x0100;
+        private const byte STACK_RESET = 0xFD;
+        private const ushort PC_AT_POWER = 0xFFFC;
+
+
+        public CPU(IBusDevice Bus)
         {
+
+            _bus = Bus;
 
             /*
             Initial CPU Register Values
@@ -40,33 +56,15 @@ namespace NES_Emulator
             V	        0	                unchanged
             N	        0	                unchanged
             */
-
-            _memory = Memory;
-
             register_acc = 0;
             register_x = 0;
             status = CPUStatus.Initial;
             program_counter = PC_AT_POWER;
-            Cycles = 1;
             ExtraCycles = 0;
             instruction_table = new CPUInstructionTable();
             stack_pointer = STACK_RESET;
         }
 
-        public byte register_acc { get; set; }
-        public byte register_x { get; set; }
-        public byte register_y { get; set; }
-        public byte status { get; set; }
-        public byte stack_pointer { get; set; }
-        public ushort program_counter { get; set; }
-        public long Cycles { get; set; }
-        public long ExtraCycles { get; set; }
-        public iMemory _memory { get; set; }
-        public CPUInstructionTable instruction_table { get; set; }
-
-        private const ushort STACK_START_ADDR = 0x0100;
-        private const byte STACK_RESET = 0xFD;
-        private const ushort PC_AT_POWER = 0xFFFC;
 
         public long Step(OnUpdateCallBack? callback = null)
         {
@@ -85,7 +83,7 @@ namespace NES_Emulator
             {
                 for (ushort i = 1; i < instruction.bytes; i++)
                 {
-                    data.Add(_memory.read((ushort)(pc_for_log + i)).ToString("X2"));
+                    data.Add(_bus.Read((ushort)(pc_for_log + i)).ToString("X2"));
                 }
             }
 
@@ -614,7 +612,7 @@ namespace NES_Emulator
 
         private ICPUInstruction GetNextInstruction()
         {
-            byte instruction = _memory.read(program_counter);
+            byte instruction = _bus.Read(program_counter);
             program_counter++;
             CPUInstruction opcode = instruction_table.GetInstruction(instruction);
             return opcode;
@@ -624,7 +622,7 @@ namespace NES_Emulator
         private void SRE(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode, MemoryAccessType.ReadModifyWrite);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
 
             // LSR
             if ((value & CPUStatus.Carry) == 1)
@@ -637,7 +635,7 @@ namespace NES_Emulator
             }
 
             byte rightShiftedValue = (byte)(value >> 1);
-            _memory.write(addr, rightShiftedValue);
+            _bus.Write(addr, rightShiftedValue);
 
             // EOR
             byte xoredValue = (byte)(register_acc ^ rightShiftedValue);
@@ -649,7 +647,7 @@ namespace NES_Emulator
         {
 
             ushort addr = getAddressByMode(mode, MemoryAccessType.ReadModifyWrite);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
 
             // ASL
             bool is7thBitSet = (value >> 7) == 1;
@@ -663,7 +661,7 @@ namespace NES_Emulator
             }
 
             byte result = (byte)(value << 1);
-            _memory.write(addr, result);
+            _bus.Write(addr, result);
 
             // ORA
             setRegisterAcc((byte)(register_acc | result));
@@ -673,11 +671,11 @@ namespace NES_Emulator
         private void RLA(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode, MemoryAccessType.ReadModifyWrite);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
 
             // ROL
             byte rotatedValue = rotateOneBitLeft(value);
-            _memory.write(addr, rotatedValue);
+            _bus.Write(addr, rotatedValue);
 
             // AND
             setRegisterAcc((byte)(register_acc & rotatedValue));
@@ -687,11 +685,11 @@ namespace NES_Emulator
         private void RRA(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode, MemoryAccessType.ReadModifyWrite);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
 
             // ROR
             byte rotatedValue = rotateOneBitRight(value);
-            _memory.write(addr, rotatedValue);
+            _bus.Write(addr, rotatedValue);
 
             // ADC
             addToRegisterA(rotatedValue);
@@ -700,23 +698,23 @@ namespace NES_Emulator
         private void DCP(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode, MemoryAccessType.ReadModifyWrite);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
             byte decrementedValue = (byte)(value - 1);
-            _memory.write(addr, decrementedValue);
+            _bus.Write(addr, decrementedValue);
             CompareByValue(decrementedValue, register_acc);
         }
 
         private void NOP(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr); // The value is discarded and the CPU state is not affected.
+            byte value = _bus.Read(addr); // The value is discarded and the CPU state is not affected.
             return;
         }
 
         private void ADC(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
             addToRegisterA(value);
         }
 
@@ -748,7 +746,7 @@ namespace NES_Emulator
         private void ASL(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte old_value = _memory.read(addr);
+            byte old_value = _bus.Read(addr);
 
             bool is7thBitSet = (old_value >> 7) == 1;
             if (is7thBitSet)
@@ -761,7 +759,7 @@ namespace NES_Emulator
             }
 
             byte result = (byte)(old_value << 1);
-            _memory.write(addr, result);
+            _bus.Write(addr, result);
             updateZeroAndNegativeFlags(result);
         }
 
@@ -783,7 +781,7 @@ namespace NES_Emulator
         private void BIT(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte data = _memory.read(addr);
+            byte data = _bus.Read(addr);
 
             if (mode != CPUAddressingMode.ZeroPage && mode != CPUAddressingMode.Absolute)
             {
@@ -839,7 +837,7 @@ namespace NES_Emulator
         {
             ushort value = (ushort)(register_acc & register_x);
             ushort addr = getAddressByMode(mode);
-            _memory.write(addr, (byte)value);
+            _bus.Write(addr, (byte)value);
         }
 
         private void BRK()
@@ -897,7 +895,7 @@ namespace NES_Emulator
         private void CompareByAddress(CPUAddressingMode mode, byte reg)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
             CompareByValue(value, reg);
         }
 
@@ -926,8 +924,8 @@ namespace NES_Emulator
         private void DEC(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte decValue = (byte)(_memory.read(addr) - 1);
-            _memory.write(addr, decValue);
+            byte decValue = (byte)(_bus.Read(addr) - 1);
+            _bus.Write(addr, decValue);
             updateZeroAndNegativeFlags(decValue);
         }
 
@@ -946,7 +944,7 @@ namespace NES_Emulator
         private void EOR(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
 
             register_acc = (byte)(register_acc ^ value);
             updateZeroAndNegativeFlags(register_acc);
@@ -955,17 +953,17 @@ namespace NES_Emulator
         private void INC(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte incValue = (byte)(_memory.read(addr) + 1);
-            _memory.write(addr, incValue);
+            byte incValue = (byte)(_bus.Read(addr) + 1);
+            _bus.Write(addr, incValue);
             updateZeroAndNegativeFlags(incValue);
         }
 
         private void ISC(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode, MemoryAccessType.ReadModifyWrite);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
             byte incrementedValue = (byte)(value + 1);
-            _memory.write(addr, incrementedValue);
+            _bus.Write(addr, incrementedValue);
             addToRegisterA((byte)~incrementedValue);
         }
 
@@ -993,8 +991,14 @@ namespace NES_Emulator
         ///</summary>
         private void JSR()
         {
-            var tempPC = program_counter;
-            var subAddr = _memory.readU16(ref tempPC);
+            ushort tempPC = program_counter;
+            byte lo = _bus.Read(tempPC);
+            tempPC++;
+            byte hi = _bus.Read(tempPC);
+            tempPC++;
+
+            ushort subAddr = (ushort)((hi << 8) | lo);
+
             pushUshortToStack((ushort)(tempPC - 1));
             program_counter = subAddr;
         }
@@ -1012,14 +1016,14 @@ namespace NES_Emulator
         private void LDA(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
             setRegisterAcc(value);
         }
 
         private void LAX(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
             setRegisterAcc(value);
             register_x = value;
             updateZeroAndNegativeFlags(register_x);
@@ -1028,7 +1032,7 @@ namespace NES_Emulator
         private void LDX(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
             register_x = value;
             updateZeroAndNegativeFlags(register_x);
         }
@@ -1036,7 +1040,7 @@ namespace NES_Emulator
         private void LDY(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
             register_y = value;
             updateZeroAndNegativeFlags(register_y);
         }
@@ -1061,7 +1065,7 @@ namespace NES_Emulator
         private void LSR(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte old_value = _memory.read(addr);
+            byte old_value = _bus.Read(addr);
 
             if ((old_value & CPUStatus.Carry) == 1)
             {
@@ -1073,7 +1077,7 @@ namespace NES_Emulator
             }
 
             byte rightShiftedValue = (byte)(old_value >> 1);
-            _memory.write(addr, rightShiftedValue);
+            _bus.Write(addr, rightShiftedValue);
             updateZeroAndNegativeFlags(rightShiftedValue);
         }
 
@@ -1081,7 +1085,7 @@ namespace NES_Emulator
         private void ORA(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
             setRegisterAcc((byte)(register_acc | value));
         }
 
@@ -1123,9 +1127,9 @@ namespace NES_Emulator
         private void ROL(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
             byte rotated = rotateOneBitLeft(value);
-            _memory.write(addr, rotated);
+            _bus.Write(addr, rotated);
         }
 
         private byte rotateOneBitLeft(byte Value)
@@ -1155,9 +1159,9 @@ namespace NES_Emulator
         private void ROR(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
             byte rotated = rotateOneBitRight(value);
-            _memory.write(addr, rotated);
+            _bus.Write(addr, rotated);
         }
 
         private byte rotateOneBitRight(byte Value)
@@ -1188,7 +1192,7 @@ namespace NES_Emulator
         private void SBC(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
             addToRegisterA((byte)(~value));
         }
 
@@ -1210,25 +1214,25 @@ namespace NES_Emulator
         private void STA(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode, MemoryAccessType.Write);
-            _memory.write(addr, register_acc);
+            _bus.Write(addr, register_acc);
         }
 
         private void STX(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            _memory.write(addr, register_x);
+            _bus.Write(addr, register_x);
         }
 
         private void STY(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            _memory.write(addr, register_y);
+            _bus.Write(addr, register_y);
         }
 
         private void STZ(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            _memory.write(addr, (byte)(status & CPUStatus.Zero));
+            _bus.Write(addr, (byte)(status & CPUStatus.Zero));
         }
 
         private void TAX()
@@ -1269,10 +1273,10 @@ namespace NES_Emulator
         private void TRB(CPUAddressingMode mode)
         {
             ushort addr = getAddressByMode(mode);
-            byte value = _memory.read(addr);
+            byte value = _bus.Read(addr);
 
             byte testResult = (byte)(~register_acc & value);
-            _memory.write(addr, testResult);
+            _bus.Write(addr, testResult);
 
             if (testResult == 0)
             {
@@ -1346,30 +1350,38 @@ namespace NES_Emulator
                     return addr;
 
                 case CPUAddressingMode.ZeroPage:
-                    addr = _memory.read(program_counter);
+                    addr = _bus.Read(program_counter);
                     program_counter++;
                     return addr;
 
                 case CPUAddressingMode.ZeroPage_X:
-                    pos = _memory.read(program_counter);
+                    pos = _bus.Read(program_counter);
                     program_counter++;
                     addr = (byte)(pos + register_x);
                     return addr;
 
                 case CPUAddressingMode.ZeroPage_Y:
-                    pos = _memory.read(program_counter);
+                    pos = _bus.Read(program_counter);
                     program_counter++;
                     addr = (byte)(pos + register_y);
                     return addr;
 
                 case CPUAddressingMode.Absolute:
-                    addr = _memory.readU16(program_counter);
-                    program_counter += 2;
+                    lo = _bus.Read(program_counter);
+                    program_counter++;
+                    hi = _bus.Read(program_counter);
+                    program_counter++;
+
+                    addr = (ushort)((hi << 8) | lo);
                     return addr;
 
                 case CPUAddressingMode.Absolute_X:
-                    addr_base = _memory.readU16(program_counter);
-                    program_counter += 2;
+                    lo = _bus.Read(program_counter);
+                    program_counter++;
+                    hi = _bus.Read(program_counter);
+                    program_counter++;
+
+                    addr_base = (ushort)((hi << 8) | lo);
                     addr = (ushort)(addr_base + register_x);
 
                     pageCrossed = isPageCrossed(addr_base, addr);
@@ -1381,8 +1393,12 @@ namespace NES_Emulator
                     return addr;
 
                 case CPUAddressingMode.Absolute_Y:
-                    addr_base = _memory.readU16(program_counter);
-                    program_counter += 2;
+                    lo = _bus.Read(program_counter);
+                    program_counter++;
+                    hi = _bus.Read(program_counter);
+                    program_counter++;
+
+                    addr_base = (ushort)((hi << 8) | lo);
                     addr = (ushort)(addr_base + register_y);
 
                     pageCrossed = isPageCrossed(addr_base, addr);
@@ -1394,33 +1410,39 @@ namespace NES_Emulator
                     return addr;
 
                 case CPUAddressingMode.Indirect:
-                    addr_base = _memory.readU16(program_counter);
-                    program_counter += 2;
+                    lo = _bus.Read(program_counter);
+                    program_counter++;
+                    hi = _bus.Read(program_counter);
+                    program_counter++;
+
+                    addr_base = (ushort)((hi << 8) | lo);
 
                     // 6502 bug: if the low byte of the address is 0xFF, the high byte is fetched from the beginning of the page instead of the next page
                     if ((addr_base & 0x00FF) == 0x00FF)
                     {
-                        lo = _memory.read(addr_base);
-                        hi = _memory.read((ushort)(addr_base & 0xFF00));
+                        lo = _bus.Read(addr_base);
+                        hi = _bus.Read((ushort)(addr_base & 0xFF00));
                         addr = (ushort)((hi << 8) | lo);
                     }
                     else
                     {
-                        addr = _memory.readU16(addr_base);
+                        lo = _bus.Read(addr_base);
+                        hi = _bus.Read((ushort)(addr_base + 1));
+                        addr = (ushort)((hi << 8) | lo);
                     }
 
                     return addr;
 
                 case CPUAddressingMode.Indirect_X:
-                    addr_base = _memory.read(program_counter);
+                    addr_base = _bus.Read(program_counter);
                     program_counter++;
                     ptr = (byte)(addr_base + register_x);
-                    lo = _memory.read(ptr);
-                    hi = _memory.read((byte)(ptr + 1));
+                    lo = _bus.Read(ptr);
+                    hi = _bus.Read((byte)(ptr + 1));
                     addr = (ushort)(hi << 8 | lo);
 
                     pageCrossed = isPageCrossed(ptr, (byte)(ptr + 1));
-                    if (pageCrossed  && accessType == MemoryAccessType.Read)
+                    if (pageCrossed && accessType == MemoryAccessType.Read)
                     {
                         ExtraCycles += 1; // Add 1 cycle if a page boundary is crossed
                     }
@@ -1428,10 +1450,10 @@ namespace NES_Emulator
                     return addr;
 
                 case CPUAddressingMode.Indirect_Y:
-                    addr_base = _memory.read(program_counter);
+                    addr_base = _bus.Read(program_counter);
                     program_counter++;
-                    lo = _memory.read(addr_base);
-                    hi = _memory.read((byte)(addr_base + 1));
+                    lo = _bus.Read(addr_base);
+                    hi = _bus.Read((byte)(addr_base + 1));
                     ushort deref_base = (ushort)((hi << 8) | lo);
 
                     // TODO: check if the deref address has a page break, if so, add 1 cycle to the  CPU instruction 
@@ -1455,7 +1477,7 @@ namespace NES_Emulator
             switch (mode)
             {
                 case CPUAddressingMode.Immediate:
-                    byte value = _memory.read(program_counter);
+                    byte value = _bus.Read(program_counter);
                     program_counter++;
                     return value;
 
@@ -1469,7 +1491,7 @@ namespace NES_Emulator
                 case CPUAddressingMode.Indirect_X:
                 case CPUAddressingMode.Indirect_Y:
                     var addr = getAddressByMode(mode);
-                    return _memory.read(addr);
+                    return _bus.Read(addr);
 
                 default:
                     throw new Exception($"Invalid addressing mode: {mode}!");
@@ -1516,14 +1538,18 @@ namespace NES_Emulator
             }
         }
 
-        public void reset()
+        public void Reset()
         {
             register_acc = 0;
             register_x = 0;
             register_y = 0;
             status = CPUStatus.Initial;
             stack_pointer = STACK_RESET;
-            program_counter = _memory.readU16(PC_AT_POWER);
+
+            ushort lo = _bus.Read(PC_AT_POWER);
+            ushort hi = _bus.Read(PC_AT_POWER + 1);
+            program_counter = (ushort)((hi << 8) | lo);
+
             Cycles = 7; // Initial cycle value due to reset sequence cost
         }
 
@@ -1534,7 +1560,7 @@ namespace NES_Emulator
 
             if (condition)
             {
-                sbyte displacement = (sbyte)_memory.read(addr);
+                sbyte displacement = (sbyte)_bus.Read(addr);
                 ushort targetPC = (ushort)(program_counter + displacement);
                 bool pageCrossed = (nextPC & 0xFF00) != (targetPC & 0xFF00);
                 ExtraCycles = (byte)(1 + (pageCrossed ? 1 : 0)); // Add 1 cycle if a page boundary is crossed, otherwise add 1 cycle
@@ -1547,8 +1573,8 @@ namespace NES_Emulator
         {
             if (condition)
             {
-                var low = _memory.read(program_counter);
-                var high = _memory.read((ushort)(program_counter + 1));
+                var low = _bus.Read(program_counter);
+                var high = _bus.Read((ushort)(program_counter + 1));
 
                 ushort displacement = (ushort)((high << 8) | low);
                 program_counter = (ushort)(program_counter + displacement + 2);
@@ -1558,12 +1584,12 @@ namespace NES_Emulator
         public byte stackPop()
         {
             stack_pointer = (byte)(stack_pointer + 1);
-            return _memory.read((ushort)(STACK_START_ADDR + stack_pointer));
+            return _bus.Read((ushort)(STACK_START_ADDR + stack_pointer));
         }
 
         public void stackPush(byte Data)
         {
-            _memory.write((ushort)(STACK_START_ADDR + stack_pointer), Data);
+            _bus.Write((ushort)(STACK_START_ADDR + stack_pointer), Data);
             stack_pointer = (byte)(stack_pointer - 1);
         }
 

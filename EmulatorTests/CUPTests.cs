@@ -4,12 +4,12 @@ namespace EmulatorTests;
 
 public class CPUTests
 {
-    private readonly Memory mem;
+    private readonly Ram mem;
     private readonly CPU uut;
 
     public CPUTests()
     {
-        mem = new Memory();
+        mem = new Ram();
         uut = new CPU(mem);
     }
 
@@ -87,7 +87,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0xaa, 0x00 };
         uut.load(data);
-        uut.reset();
+        uut.Reset();
         uut.register_acc = 10;
 
         uut.Step();
@@ -110,7 +110,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0xe8, 0xe8, 0x00 };
         uut.load(data);
-        uut.reset();
+        uut.Reset();
         uut.register_x = 0xFF;
 
         uut.Step();
@@ -122,7 +122,7 @@ public class CPUTests
     public void test_lda_from_memory()
     {
         byte[] data = new byte[] { 0xA5, 0x10, 0x00 };
-        mem.write(0x10, 0x55);
+        mem.Write(0x10, 0x55);
 
         uut.loadAndRun(data);
 
@@ -134,7 +134,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0x18, 0x00 };
         uut.load(data);
-        uut.reset();
+        uut.Reset();
         uut.setStatus(CPUStatus.Carry);
 
         uut.Step();
@@ -147,7 +147,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0x18, 0xA9, 0x4C, 0x6D, 0x10, 0x00 };
 
-        mem.write(0x10, 0x55);
+        mem.Write(0x10, 0x55);
         uut.loadAndRun(data);
 
         Assert.Equal(0xA1, uut.register_acc);
@@ -260,7 +260,7 @@ public class CPUTests
         byte[] data = new byte[] { 0x90, 0x02, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
-        uut.reset();
+        uut.Reset();
 
         uut.setStatus(CPUStatus.Carry);
         uut.Step();
@@ -275,7 +275,7 @@ public class CPUTests
         byte[] data = new byte[] { 0xB0, 0x01, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
-        uut.reset();
+        uut.Reset();
 
         uut.setStatus(CPUStatus.Carry);
         uut.Step();
@@ -302,7 +302,7 @@ public class CPUTests
         byte[] data = new byte[] { 0xF0, 0x01, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
-        uut.reset();
+        uut.Reset();
 
         uut.setStatus(CPUStatus.Zero);
         uut.Step();
@@ -325,7 +325,7 @@ public class CPUTests
     public void test_bits_in_memory_with_accumulator_zero_flag_showld_be_set()
     {
         byte[] data = new byte[] { 0xa9, 0x0f, 0x24, 0x10, 0x00 };
-        mem.write(0x10, 0xf0);
+        mem.Write(0x10, 0xf0);
 
         uut.loadAndRun(data);
 
@@ -336,7 +336,7 @@ public class CPUTests
     public void test_bits_in_memory_with_accumulator()
     {
         byte[] data = new byte[] { 0xa9, 0x0f, 0x24, 0x10, 0x00 };
-        mem.write(0x10, 0xf0);
+        mem.Write(0x10, 0xf0);
 
         uut.loadAndRun(data);
 
@@ -351,7 +351,7 @@ public class CPUTests
         byte[] data = new byte[] { 0x30, 0x01, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
-        uut.reset();
+        uut.Reset();
 
         uut.setStatus(CPUStatus.Negative);
         uut.Step();
@@ -388,7 +388,7 @@ public class CPUTests
         byte[] data = new byte[] { 0xD0, 0x02, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
-        uut.reset();
+        uut.Reset();
 
         uut.setStatus(CPUStatus.Zero);
         uut.Step();
@@ -414,7 +414,7 @@ public class CPUTests
         byte[] data = new byte[] { 0x10, 0x02, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
-        uut.reset();
+        uut.Reset();
 
         uut.setStatus(CPUStatus.Negative);
         uut.Step();
@@ -440,7 +440,7 @@ public class CPUTests
         byte[] data = new byte[] { 0x50, 0x02, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
-        uut.reset();
+        uut.Reset();
 
         uut.setStatus(CPUStatus.Overflow);
         uut.Step();
@@ -455,7 +455,7 @@ public class CPUTests
         byte[] data = new byte[] { 0x70, 0x01, 0x00, 0xa9, 0x05, 0x00 };
 
         uut.load(data);
-        uut.reset();
+        uut.Reset();
 
         uut.setStatus(CPUStatus.Overflow);
         uut.Step();
@@ -480,7 +480,7 @@ public class CPUTests
         byte[] data = new byte[] { 0xD8, 0x00 };
 
         uut.load(data);
-        uut.reset();
+        uut.Reset();
         uut.setStatus(CPUStatus.Decimal);
         uut.Step();
 
@@ -492,7 +492,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0x58, 0x00 };
         uut.load(data);
-        uut.reset();
+        uut.Reset();
 
         uut.setStatus(CPUStatus.Interrupt);
         uut.Step();
@@ -505,7 +505,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0xB8, 0x00 };
         uut.load(data);
-        uut.reset();
+        uut.Reset();
 
         uut.setStatus(CPUStatus.Overflow);
         uut.Step();
@@ -577,11 +577,11 @@ public class CPUTests
     public void test_dec_decrement_memory_by_one()
     {
         byte[] data = new byte[] { 0xC6, 0x10, 0x00 };
-        mem.write(0x10, 0x02);
+        mem.Write(0x10, 0x02);
 
         uut.loadAndRun(data);
 
-        var moddedValue = mem.read(0x10);
+        var moddedValue = mem.Read(0x10);
         Assert.Equal(0x01, moddedValue);
     }
 
@@ -589,11 +589,11 @@ public class CPUTests
     public void test_dec_decrement_memory_by_one_zero_value()
     {
         byte[] data = new byte[] { 0xC6, 0x10, 0x00 };
-        mem.write(0x10, 0x00);
+        mem.Write(0x10, 0x00);
 
         uut.loadAndRun(data);
 
-        var moddedValue = mem.read(0x10);
+        var moddedValue = mem.Read(0x10);
         Assert.Equal(0xFF, moddedValue);
     }
 
@@ -602,7 +602,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0xCA, 0x00 };
         uut.load(data);
-        uut.reset();
+        uut.Reset();
         uut.register_x = 2;
 
         uut.Step();
@@ -615,7 +615,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0xCA, 0x00 };
         uut.load(data);
-        uut.reset();
+        uut.Reset();
         uut.register_x = 0;
 
         uut.Step();
@@ -628,7 +628,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0x88, 0x00 };
         uut.load(data);
-        uut.reset();
+        uut.Reset();
         uut.register_y = 2;
 
         uut.Step();
@@ -641,7 +641,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0x88, 0x00 };
         uut.load(data);
-        uut.reset();
+        uut.Reset();
         uut.register_y = 0;
 
         uut.Step();
@@ -663,11 +663,11 @@ public class CPUTests
     public void test_inc_increment_memory_by_one()
     {
         byte[] data = new byte[] { 0xE6, 0x10, 0x00 };
-        mem.write(0x10, 0x01);
+        mem.Write(0x10, 0x01);
 
         uut.loadAndRun(data);
 
-        var moddedValue = mem.read(0x10);
+        var moddedValue = mem.Read(0x10);
         Assert.Equal(0x02, moddedValue);
     }
 
@@ -675,11 +675,11 @@ public class CPUTests
     public void test_inc_increment_memory_by_one_zero_value()
     {
         byte[] data = new byte[] { 0xE6, 0x10, 0x00 };
-        mem.write(0x10, 0xFF);
+        mem.Write(0x10, 0xFF);
 
         uut.loadAndRun(data);
 
-        var moddedValue = mem.read(0x10);
+        var moddedValue = mem.Read(0x10);
         Assert.Equal(0x00, moddedValue);
     }
 
@@ -688,7 +688,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0xE8, 0x00 };
         uut.load(data);
-        uut.reset();
+        uut.Reset();
         uut.register_x = 1;
 
         uut.Step();
@@ -701,7 +701,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0xE8, 0x00 };
         uut.load(data);
-        uut.reset();
+        uut.Reset();
         uut.register_x = 255;
 
         uut.Step();
@@ -714,7 +714,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0xC8, 0x00 };
         uut.load(data);
-        uut.reset();
+        uut.Reset();
         uut.register_y = 1;
 
         uut.Step();
@@ -727,7 +727,7 @@ public class CPUTests
     {
         byte[] data = new byte[] { 0xC8, 0x00 };
         uut.load(data);
-        uut.reset();
+        uut.Reset();
         uut.register_y = 255;
 
         uut.Step();
@@ -739,11 +739,11 @@ public class CPUTests
     public void test_lsr_shift_one_bit_right()
     {
         byte[] data = new byte[] { 0x46, 0x10, 0x00 };
-        mem.write(0x10, 0x0A);
+        mem.Write(0x10, 0x0A);
 
         uut.loadAndRun(data);
 
-        Assert.Equal(0x05, mem.read(0x10));
+        Assert.Equal(0x05, mem.Read(0x10));
         Assert.Equal(0, uut.status & CPUStatus.Carry);
         Assert.True((uut.status & CPUStatus.Negative) == 0);
         Assert.True((uut.status & CPUStatus.Zero) == 0);
@@ -820,7 +820,7 @@ public class CPUTests
             0x42
         };
 
-        mem.write(0x8000, CPUOpcodes.RTS);
+        mem.Write(0x8000, CPUOpcodes.RTS);
 
         uut.loadAndRun(data);
 
@@ -850,8 +850,8 @@ public class CPUTests
             0x80,
         };
 
-        mem.write(0x8000, 0x00);
-        mem.write(0x8001, 0x90);
+        mem.Write(0x8000, 0x00);
+        mem.Write(0x8001, 0x90);
 
         uut.loadAndRun(data);
 
