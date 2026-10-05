@@ -64,9 +64,9 @@ namespace NES_Emulator
 
             // BIT - Bit Test
             lookupTable.Add(CPUOpcodes.BIT_Immediate, new CPUInstruction { opcode = CPUOpcodes.BIT_Immediate, mnemonic = "BIT", bytes = 2, BaseCycles = 2, mode = CPUAddressingMode.Immediate });
-            lookupTable.Add(CPUOpcodes.BIT_Absolute, new CPUInstruction { opcode = CPUOpcodes.BIT_Absolute, mnemonic = "BIT", bytes = 3, BaseCycles = 3, mode = CPUAddressingMode.Absolute });
+            lookupTable.Add(CPUOpcodes.BIT_Absolute, new CPUInstruction { opcode = CPUOpcodes.BIT_Absolute, mnemonic = "BIT", bytes = 3, BaseCycles = 4, mode = CPUAddressingMode.Absolute });
             lookupTable.Add(CPUOpcodes.BIT_Absolute_X, new CPUInstruction { opcode = CPUOpcodes.BIT_Absolute_X, mnemonic = "BIT", bytes = 3, BaseCycles = 3, mode = CPUAddressingMode.Absolute_X });
-            lookupTable.Add(CPUOpcodes.BIT_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.BIT_ZeroPage, mnemonic = "BIT", bytes = 2, BaseCycles = 2, mode = CPUAddressingMode.ZeroPage });
+            lookupTable.Add(CPUOpcodes.BIT_ZeroPage, new CPUInstruction { opcode = CPUOpcodes.BIT_ZeroPage, mnemonic = "BIT", bytes = 2, BaseCycles = 3, mode = CPUAddressingMode.ZeroPage });
             lookupTable.Add(CPUOpcodes.BIT_ZeroPage_X, new CPUInstruction { opcode = CPUOpcodes.BIT_ZeroPage_X, mnemonic = "BIT", bytes = 2, BaseCycles = 2, mode = CPUAddressingMode.ZeroPage_X });
 
             // BMI - Branch if Minus

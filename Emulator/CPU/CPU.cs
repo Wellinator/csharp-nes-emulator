@@ -1220,7 +1220,7 @@ namespace NES_Emulator
 
         private void STA(CPUAddressingMode mode)
         {
-            ushort addr = getAddressByMode(mode);
+            ushort addr = getAddressByMode(mode, MemoryAccessType.Write);
             _memory.write(addr, register_acc);
         }
 
@@ -1338,12 +1338,18 @@ namespace NES_Emulator
             setRegisterAcc(result);
         }
 
-        private ushort getAddressByMode(CPUAddressingMode mode)
+        private bool isPageCrossed(ushort addr1, ushort addr2)
+        {
+            return (addr1 & 0xFF00) != (addr2 & 0xFF00);
+        }
+
+        private ushort getAddressByMode(CPUAddressingMode mode, MemoryAccessType accessType = MemoryAccessType.Read)
         {
             byte pos;
             byte ptr, lo, hi;
             ushort addr;
             ushort addr_base;
+            bool pageCrossed;
 
             switch (mode)
             {
@@ -1383,12 +1389,26 @@ namespace NES_Emulator
                     addr_base = _memory.readU16(program_counter);
                     program_counter += 2;
                     addr = (ushort)(addr_base + register_x);
+
+                    pageCrossed = isPageCrossed(addr_base, addr);
+                    if (pageCrossed && accessType == MemoryAccessType.Read)
+                    {
+                        ExtraCycles += 1; // Add 1 cycle if a page boundary is crossed
+                    }
+
                     return addr;
 
                 case CPUAddressingMode.Absolute_Y:
                     addr_base = _memory.readU16(program_counter);
                     program_counter += 2;
                     addr = (ushort)(addr_base + register_y);
+
+                    pageCrossed = isPageCrossed(addr_base, addr);
+                    if (pageCrossed && accessType == MemoryAccessType.Read)
+                    {
+                        ExtraCycles += 1; // Add 1 cycle if a page boundary is crossed
+                    }
+
                     return addr;
 
                 case CPUAddressingMode.Indirect:
@@ -1416,6 +1436,13 @@ namespace NES_Emulator
                     lo = _memory.read(ptr);
                     hi = _memory.read((byte)(ptr + 1));
                     addr = (ushort)(hi << 8 | lo);
+
+                    pageCrossed = isPageCrossed(ptr, (byte)(ptr + 1));
+                    if (pageCrossed)
+                    {
+                        ExtraCycles += 1; // Add 1 cycle if a page boundary is crossed
+                    }
+
                     return addr;
 
                 case CPUAddressingMode.Indirect_Y:
@@ -1427,6 +1454,12 @@ namespace NES_Emulator
 
                     // TODO: check if the deref address has a page break, if so, add 1 cycle to the  CPU instruction 
                     ushort deref = (ushort)(deref_base + register_y);
+
+                    pageCrossed = isPageCrossed(deref_base, deref);
+                    if (pageCrossed)
+                    {
+                        ExtraCycles += 1; // Add 1 cycle if a page boundary is crossed
+                    }
 
                     return deref;
 
@@ -1514,12 +1547,17 @@ namespace NES_Emulator
 
         public void branch(bool condition)
         {
+            ushort nextPC = (ushort)(program_counter + 2);
             ushort addr = getAddressByMode(CPUAddressingMode.Relative);
 
             if (condition)
             {
                 sbyte displacement = (sbyte)_memory.read(addr);
-                program_counter = (ushort)(program_counter + displacement);
+                ushort targetPC = (ushort)(program_counter + displacement);
+                bool pageCrossed = (nextPC & 0xFF00) != (targetPC & 0xFF00);
+                ExtraCycles = (byte)(1 + (pageCrossed ? 1 : 0)); // Add 1 cycle if a page boundary is crossed, otherwise add 1 cycle
+
+                program_counter = targetPC;
             }
         }
 
