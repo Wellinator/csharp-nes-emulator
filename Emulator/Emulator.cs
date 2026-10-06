@@ -6,15 +6,15 @@ namespace NES_Emulator
         public readonly IBusDevice _bus;
         public readonly iCPU _cpu;
         public readonly ICartridge _cartridge;
-        public readonly IRam _ram = new Ram();
-        public readonly IPPU _ppu = new PPU();
+        public readonly IRam _ram;
+        public readonly IPPU _ppu;
         private long _cycles = 0;
 
         public Emulator()
         {
             _cartridge = new Cartridge();
             _ram = new Ram();
-            _ppu = new PPU();
+            _ppu = new PPU(_cartridge);
             _bus = new Bus(_ram, _ppu, _cartridge);
             _cpu = new CPU(_bus);
         }
