@@ -8,6 +8,7 @@ namespace NES_Emulator
         public readonly ICartridge _cartridge;
         public readonly IRam _ram = new Ram();
         public readonly IPPU _ppu = new PPU();
+        private long _cycles = 0;
 
         public Emulator()
         {
@@ -30,7 +31,13 @@ namespace NES_Emulator
             while (true)
             {
                 long Cycles = _cpu.Step(callback);
+                _cycles += Cycles;
 
+                // Step the PPU 3x for each CPU cycle
+                for (long i = 0; i < Cycles; i++)
+                {
+                    _ppu.Step();
+                }
             }
         }
     }
